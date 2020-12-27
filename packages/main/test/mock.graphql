@@ -1,0 +1,10 @@
+type User {
+    """
+    @id
+    """
+    _id: ID!
+    """
+    @unique
+    """
+    username: String!
+}
