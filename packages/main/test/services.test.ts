@@ -1,9 +1,10 @@
 import "jest";
+import { join } from "path";
 import { buildServices } from "../src";
 
-const schemaPath = "./test/mock.graphql";
+const schemaPath = join(__dirname, "./mock.graphql");
 
-test.todo("it should create CRUD services for models defined in the gql schema", () => {
+test("it should create CRUD services for models defined in the gql schema", () => {
     const services: any = buildServices(schemaPath);
     expect(services.User).toBeDefined();
 });
