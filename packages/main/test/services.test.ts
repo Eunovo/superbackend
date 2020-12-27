@@ -1,11 +1,11 @@
 import "jest";
 import { join } from "path";
-import { buildServices } from "../src";
+import { buildServices, buildMongoRepo } from "../src";
 
 const schemaPath = join(__dirname, "./mock.graphql");
 
 test("it should create CRUD services for models defined in the gql schema", () => {
-    const services: any = buildServices(schemaPath);
+    const services: any = buildServices(schemaPath, buildMongoRepo);
     expect(services.User).toBeDefined();
 });
 
