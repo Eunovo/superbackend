@@ -53,7 +53,7 @@ describe("Test MongoDB repo builder", () => {
         expect(user).toEqual(null);
     });
 
-    test.only("it should translate metadata into schema definition", async () => {
+    test("it should translate metadata into schema definition", async () => {
         const defaultValue = 'test';
         const schemaString = `
             type TestMetadata {
