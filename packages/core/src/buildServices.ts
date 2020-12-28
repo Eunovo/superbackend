@@ -2,6 +2,7 @@ import { buildSchema, GraphQLObjectType } from "graphql";
 import { readFileSync } from "fs";
 import { CRUDService } from "./CRUDService";
 import { RepoBuilder, Repository } from "./repositories";
+import { extractModelsFrom } from "./utils";
 
 
 /**
@@ -13,16 +14,12 @@ import { RepoBuilder, Repository } from "./repositories";
 export function buildServices(schemaPath: string, buildRepo: RepoBuilder) {
     const schemaString = readFileSync(schemaPath).toString();
     const gqlSchema = buildSchema(schemaString);
+    const models = extractModelsFrom(gqlSchema);
 
-    const typeMap = gqlSchema.getTypeMap();
-    return Object.keys(typeMap)
-        .reduce((prev: any, key: string) => {
-            const node = typeMap[key];
-            if (node.astNode?.kind !== 'ObjectTypeDefinition') return prev;
-
-            const name = node.name;
-            const repo: Repository = buildRepo(node as GraphQLObjectType);
-            const service = new CRUDService(name, repo);
-            return { ...prev, [name]: service };
-        }, {});
+    return models.reduce((prev: any, node: GraphQLObjectType) => {
+        const name = node.name;
+        const repo: Repository = buildRepo(node as GraphQLObjectType);
+        const service = new CRUDService(name, repo);
+        return { ...prev, [name]: service };
+    }, {});
 }
