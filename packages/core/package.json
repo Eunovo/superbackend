@@ -1,5 +1,5 @@
 {
-  "name": "main",
+  "name": "core",
   "version": "0.1.0",
   "main": "dist/index.js",
   "author": "Eunovo",
