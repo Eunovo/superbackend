@@ -9,6 +9,7 @@ import {
     isNonNullType
 } from "graphql";
 import { Schema, SchemaTypes } from "mongoose";
+import { extractMetadata } from "../../../utils";
 
 export function buildSchema(gqlObject: GraphQLObjectType): Schema {
     const fields = gqlObject.getFields();
@@ -31,7 +32,14 @@ function getDefinition(field: GraphQLField<any, any>) {
         defintion.required = true;
         const type = getNullableType(field.type);
         defintion.type = getSchemaType(type);
+    } else {
+        defintion.type = getSchemaType(field.type);
     }
+
+    const metadata = extractMetadata(field.description || "");
+    metadata.forEach(({ name, value }) => {
+        defintion[name] = value;
+    });
 
     return defintion;
 }

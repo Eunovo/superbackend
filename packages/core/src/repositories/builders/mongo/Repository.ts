@@ -6,6 +6,7 @@ export class MongoRepository implements Repository {
     constructor(private model: Model<any>) {}
 
     async create(data: any) {
+        await this.model.init();
         const model = new this.model(data);
         await model.save();
     }
@@ -15,6 +16,7 @@ export class MongoRepository implements Repository {
     }
 
     async updateOne(filter: any, update: any) {
+        await this.model.init();
         return this.model.updateOne(filter, update);
     }
 
