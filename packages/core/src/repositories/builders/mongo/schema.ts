@@ -51,6 +51,13 @@ function getSchemaType(type: GraphQLType): any {
 
         case 'string':
             return SchemaTypes.String;
+
+        case 'boolean':
+            return SchemaTypes.Boolean;
+
+        case 'int':
+        case 'float':
+            return SchemaTypes.Number;
     
         default:
             return SchemaTypes.String;
