@@ -56,6 +56,9 @@ describe("Test MongoDB repo builder", () => {
     test("it should translate metadata into schema definition", async () => {
         const defaultValue = 'test';
         const schemaString = `
+            """
+            @model
+            """
             type TestMetadata {
                 """
                 @unique

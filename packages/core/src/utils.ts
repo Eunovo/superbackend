@@ -6,6 +6,15 @@ export function extractModelsFrom(gqlSchema: GraphQLSchema): GraphQLObjectType[]
         .reduce((prev: any, key: string) => {
             const node = typeMap[key];
             if (node.astNode?.kind !== 'ObjectTypeDefinition') return prev;
+            
+            const metadata = extractMetadata(node.description || "");
+            const isModel = metadata.reduce(
+                (prev: boolean, cur: Metadata) => prev || cur.name === 'model',
+                false
+            );
+
+            if (!isModel) return prev;
+            
             return [...prev, node];
         }, []);
 }
@@ -32,7 +41,7 @@ export function extractMetadata(description: string): Metadata[] {
                 return;
             }
 
-            let name = token.substring(1, startOfValue);
+            let name = token.substring(1, startOfValue).toLowerCase();
             let value: any = token.substring(startOfValue + 1, token.indexOf(')'));
 
             if (value.startsWith("'") || value.startsWith('"')) {
