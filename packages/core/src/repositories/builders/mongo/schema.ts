@@ -80,6 +80,9 @@ function getSchemaType(type: GraphQLType): any {
         case 'int':
         case 'float':
             return SchemaTypes.Number;
+
+        case 'date':
+            return SchemaTypes.Date;
     
         default:
             return SchemaTypes.String;
