@@ -45,7 +45,7 @@ describe("Test MongoDB repo builder", () => {
 
         const newUsername = "Bob";
         await repo.updateOne({ username }, { username: newUsername });
-        
+
         user = await repo.findOne({ username: newUsername });
         expect(user.username).toEqual(newUsername);
 
@@ -74,12 +74,37 @@ describe("Test MongoDB repo builder", () => {
         const schema = buildSchema(schemaString);
         const models = extractModelsFrom(schema);
         const repo = buildMongoRepo(models[0]);
-        
+
         const username = "Novo";
         await repo.create({ username });
         expect(repo.create({ username })).rejects.toThrow();
 
         const user = await repo.findOne({ username });
         expect(user.indicator).toEqual(defaultValue);
+    });
+
+    test("it should enforce enums", async () => {
+        const schemaString = `
+            """
+            @model
+            """
+            type TestEnum {
+                username: String!
+                role: Role!
+            }
+
+            enum Role {
+                USER
+                ADMIN
+            }
+        `;
+
+        const schema = buildSchema(schemaString);
+        const models = extractModelsFrom(schema);
+        const repo = buildMongoRepo(models[0]);
+
+        const username = "Novo";
+        await repo.create({ username, role: 'USER' });
+        expect(repo.create({ username, role: 'INVALID' })).rejects.toThrow();
     });
 });
