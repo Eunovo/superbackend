@@ -4,6 +4,7 @@ import { join } from "path";
 import { readFileSync } from "fs";
 import { buildMongoRepo, extractModelsFrom } from "../src";
 import { buildSchema } from "graphql";
+import { InputError } from "../src/errors";
 
 const schemaPath = join(__dirname, "./mock.graphql");
 const schemaString = readFileSync(schemaPath).toString();
@@ -106,5 +107,39 @@ describe("Test MongoDB repo builder", () => {
         const username = "Novo";
         await repo.create({ username, role: 'USER' });
         expect(repo.create({ username, role: 'INVALID' })).rejects.toThrow();
+    });
+
+    test("it should handle mongoose errors", async () => {
+        const schemaString = `
+            scalar Date
+            
+            """
+            @model
+            """
+            type TestError {
+                username: String!
+                createdAt: Date!
+            }
+        `;
+
+        const schema = buildSchema(schemaString);
+        const models = extractModelsFrom(schema);
+        const repo = buildMongoRepo(models[0]);
+
+        const username = "Novo";
+        await repo.create({ username, createdAt: new Date() });
+        
+        expect(repo.create({}))
+            .rejects
+            .toHaveProperty('errors', [
+                { name: 'createdAt', message: 'createdAt is required' },
+                { name: 'username', message: 'username is required' }
+            ]);
+
+        expect(repo.create({ username, createdAt: "invalid" }))
+            .rejects
+            .toHaveProperty('errors', [
+                { name: 'createdAt', message: "Cast to date failed for 'invalid'" }
+            ]);
     });
 });
