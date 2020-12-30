@@ -4,9 +4,9 @@ export class Service {
     private preMiddleware: Map<string, Middleware[]>;
     private postMiddleware: Map<string, Middleware[]>;
 
-    constructor(service?: Service) {
-        this.preMiddleware = service?.preMiddleware || new Map();
-        this.postMiddleware = service?.postMiddleware || new Map();
+    constructor() {
+        this.preMiddleware = new Map();
+        this.postMiddleware = new Map();
     }
 
     private async runMiddleware(middleware: Middleware[], ...args: any[]) {

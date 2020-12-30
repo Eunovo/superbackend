@@ -2,7 +2,7 @@ import { buildSchema, GraphQLObjectType } from "graphql";
 import { readFileSync } from "fs";
 import { RepoBuilder, Repository } from "./repositories";
 import { extractModelsFrom } from "./utils";
-import { Plugin } from "./Plugin";
+import { Plugin } from "./plugins";
 import { Service } from "./Service";
 
 

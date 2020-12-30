@@ -5,11 +5,10 @@ export type CRUDType = {}
 
 export class CRUDService extends Service {
     constructor(
-        service: Service,
         private name: string,
         private repo: Repository
     ) {
-        super(service);
+        super();
     }
     
     create(input: any) {
