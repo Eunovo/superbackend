@@ -1,15 +1,18 @@
 import {
     getNamedType,
     getNullableType,
+    GraphQLEnumType,
     GraphQLField,
+    GraphQLNamedType,
     GraphQLObjectType,
     GraphQLType,
     isCompositeType,
+    isEnumType,
     isListType,
     isNonNullType
 } from "graphql";
 import { Schema, SchemaTypes } from "mongoose";
-import { extractMetadata } from "../../../utils";
+import { extractMetadata, isModel } from "../../../utils";
 
 export function buildSchema(gqlObject: GraphQLObjectType): Schema {
     const fields = gqlObject.getFields();
@@ -26,22 +29,31 @@ export function buildSchema(gqlObject: GraphQLObjectType): Schema {
 }
 
 function getDefinition(field: GraphQLField<any, any>) {
-    const defintion: any = {};
+    const definition: any = {};
+    let type = field.type;
 
     if (isNonNullType(field.type)) {
-        defintion.required = true;
-        const type = getNullableType(field.type);
-        defintion.type = getSchemaType(type);
-    } else {
-        defintion.type = getSchemaType(field.type);
+        definition.required = true;
+        type = getNullableType(field.type);
+    }
+
+    definition.type = getSchemaType(type);
+
+    if (isEnumType(getNamedType(type))) {
+        definition.enum = (<GraphQLEnumType>type)
+            .getValues().map((value) => value.name);
+    }
+
+    if (isModel(getNamedType(type))) {
+        definition.ref = (<GraphQLNamedType>type).name;
     }
 
     const metadata = extractMetadata(field.description || "");
     metadata.forEach(({ name, value }) => {
-        defintion[name] = value;
+        definition[name] = value;
     });
 
-    return defintion;
+    return definition;
 }
 
 function getSchemaType(type: GraphQLType): any {
@@ -50,15 +62,17 @@ function getSchemaType(type: GraphQLType): any {
     }
 
     if (isCompositeType(type)) {
-        return SchemaTypes.String;
+        type = getNamedType(type);
+
+        if (isModel(type)) return SchemaTypes.ObjectId;
+        if (isEnumType(type)) return SchemaTypes.String;
+
+        return SchemaTypes.Mixed;
     }
 
     switch (type.toString().toLowerCase()) {
         case 'id':
             return SchemaTypes.ObjectId;
-
-        case 'string':
-            return SchemaTypes.String;
 
         case 'boolean':
             return SchemaTypes.Boolean;
@@ -66,6 +80,9 @@ function getSchemaType(type: GraphQLType): any {
         case 'int':
         case 'float':
             return SchemaTypes.Number;
+
+        case 'date':
+            return SchemaTypes.Date;
     
         default:
             return SchemaTypes.String;

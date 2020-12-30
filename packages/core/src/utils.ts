@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLSchema } from "graphql";
+import { GraphQLNamedType, GraphQLObjectType, GraphQLSchema } from "graphql";
 
 export function extractModelsFrom(gqlSchema: GraphQLSchema): GraphQLObjectType[] {
     const typeMap = gqlSchema.getTypeMap();
@@ -6,6 +6,9 @@ export function extractModelsFrom(gqlSchema: GraphQLSchema): GraphQLObjectType[]
         .reduce((prev: any, key: string) => {
             const node = typeMap[key];
             if (node.astNode?.kind !== 'ObjectTypeDefinition') return prev;
+
+            if (!isModel(node)) return prev;
+
             return [...prev, node];
         }, []);
 }
@@ -32,7 +35,7 @@ export function extractMetadata(description: string): Metadata[] {
                 return;
             }
 
-            let name = token.substring(1, startOfValue);
+            let name = token.substring(1, startOfValue).toLowerCase();
             let value: any = token.substring(startOfValue + 1, token.indexOf(')'));
 
             if (value.startsWith("'") || value.startsWith('"')) {
@@ -46,4 +49,12 @@ export function extractMetadata(description: string): Metadata[] {
     });
 
     return metadata;
+}
+
+export function isModel(type: GraphQLNamedType) {
+    const metadata = extractMetadata(type.description || "");
+    return metadata.reduce(
+        (prev: boolean, cur: Metadata) => prev || cur.name === 'model',
+        false
+    );
 }
