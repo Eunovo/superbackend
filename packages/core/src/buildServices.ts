@@ -3,7 +3,6 @@ import { readFileSync } from "fs";
 import { RepoBuilder, Repository } from "./repositories";
 import { extractModelsFrom } from "./utils";
 import { Plugin } from "./Plugin";
-import { CRUDPlugin } from "./plugins/crud";
 import { Service } from "./Service";
 
 
