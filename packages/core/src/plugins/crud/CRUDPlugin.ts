@@ -1,7 +1,8 @@
 import { CRUDService } from ".";
-import { Plugin } from "../../Plugin";
+import { extendService, Plugin } from "../Plugin";
 
 export const CRUDPlugin: Plugin = (node, repo, service) => {
-    const crudService = new CRUDService(service, node.name, repo);
-    return { ...service, crudService };
+    const crudService = new CRUDService(node.name, repo);
+    extendService(service, crudService);
+    return service;
 }

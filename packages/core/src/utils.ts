@@ -58,3 +58,14 @@ export function isModel(type: GraphQLNamedType) {
         false
     );
 }
+
+/**
+ * Extracts the target metadata from the
+ * input `description`
+ * @param description 
+ * @param metadataName The name of the target metadata
+ */
+export function getMetadata(description: string, metadataName: string) {
+    const metadata = extractMetadata(description);
+    return metadata.find((value) => value.name === metadataName);
+}
