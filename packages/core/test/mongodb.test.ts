@@ -1,10 +1,9 @@
 import "jest";
-import { connect, connection, Model } from "mongoose";
+import { connect, connection } from "mongoose";
 import { join } from "path";
 import { readFileSync } from "fs";
 import { buildMongoRepo, extractModelsFrom } from "../src";
 import { buildSchema } from "graphql";
-import { InputError } from "../src/errors";
 
 const schemaPath = join(__dirname, "./mock.graphql");
 const schemaString = readFileSync(schemaPath).toString();

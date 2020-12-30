@@ -1,10 +1,16 @@
-import { Repository } from "./repositories";
+import { Repository } from "../../repositories";
+import { Service } from "../../Service";
 
-export class CRUDService {
+export type CRUDType = {}
+
+export class CRUDService extends Service {
     constructor(
+        service: Service,
         private name: string,
         private repo: Repository
-    ) {}
+    ) {
+        super(service);
+    }
     
     create(input: any) {
 
