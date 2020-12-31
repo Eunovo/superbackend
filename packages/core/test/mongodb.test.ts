@@ -34,7 +34,7 @@ describe("Test MongoDB repo builder", () => {
 
     test("it should create a document in the mongo database", async () => {
         const models = extractModelsFrom(gqlSchema);
-        const userModel = models[0];
+        const userModel = models.User;
         const repo = buildMongoRepo(userModel);
 
         const username = "Novo";
@@ -73,7 +73,7 @@ describe("Test MongoDB repo builder", () => {
 
         const schema = buildSchema(schemaString);
         const models = extractModelsFrom(schema);
-        const repo = buildMongoRepo(models[0]);
+        const repo = buildMongoRepo(models.TestMetadata);
 
         const username = "Novo";
         await repo.create({ username });
@@ -101,7 +101,7 @@ describe("Test MongoDB repo builder", () => {
 
         const schema = buildSchema(schemaString);
         const models = extractModelsFrom(schema);
-        const repo = buildMongoRepo(models[0]);
+        const repo = buildMongoRepo(models.TestEnum);
 
         const username = "Novo";
         await repo.create({ username, role: 'USER' });
@@ -123,7 +123,7 @@ describe("Test MongoDB repo builder", () => {
 
         const schema = buildSchema(schemaString);
         const models = extractModelsFrom(schema);
-        const repo = buildMongoRepo(models[0]);
+        const repo = buildMongoRepo(models.TestError);
 
         const username = "Novo";
         await repo.create({ username, createdAt: new Date() });

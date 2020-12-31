@@ -1,4 +1,4 @@
-import { GraphQLObjectType } from "graphql";
+import { Model } from "../Model";
 import { Repository } from "./Repository";
 
-export type RepoBuilder = (schema: GraphQLObjectType) => Repository;
+export type RepoBuilder = (model: Model) => Repository;

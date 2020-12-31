@@ -1,6 +1,11 @@
 import { GraphQLNamedType, GraphQLObjectType, GraphQLSchema } from "graphql";
+import { Model, Metadata } from "./Model";
 
-export function extractModelsFrom(gqlSchema: GraphQLSchema): GraphQLObjectType[] {
+export type Models<T = any> = {
+    [P in keyof T]: Model
+}
+
+export function extractModelsFrom(gqlSchema: GraphQLSchema): Models {
     const typeMap = gqlSchema.getTypeMap();
     return Object.keys(typeMap)
         .reduce((prev: any, key: string) => {
@@ -9,13 +14,11 @@ export function extractModelsFrom(gqlSchema: GraphQLSchema): GraphQLObjectType[]
 
             if (!isModel(node)) return prev;
 
-            return [...prev, node];
-        }, []);
-}
-
-interface Metadata {
-    name: string;
-    args: any[];
+            return {
+                ...prev,
+                [node.name]: new Model(node as GraphQLObjectType)
+            };
+        }, {});
 }
 
 export function extractMetadata(description: string): Metadata[] {
