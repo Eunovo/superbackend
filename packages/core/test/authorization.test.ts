@@ -9,6 +9,7 @@ describe("Test Authorization", () => {
         enum Role {
             """
             @create('Store', 'owner')
+            @read('Store', 'owner')
             """
             USER
         }
@@ -40,17 +41,18 @@ describe("Test Authorization", () => {
             
         }
         StoreService.create = async function (context: any, data: any) {
-            [context, data] = await this.runPreMiddleware(context, data);
+            [context, data] = await this.runPreMiddleware('create', context, data);
         }
 
         await UserService.create({ username: 'novo', role: 'USER' });
         await UserService.create({ username: 'ben', role: 'USER' });
 
         const context: any = {
-            principal: { username: 'novo' }
+            principal: { username: 'novo', role: 'User' }
         };
 
         await StoreService.create(context, { owner: 'novo' });
-        expect(StoreService.create(context, { owner: 'ben' })).rejects.toThrow();
+        expect(StoreService.create(context, { owner: 'ben' }))
+            .rejects.toThrow();
     });
 });

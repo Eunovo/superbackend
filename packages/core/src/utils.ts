@@ -41,12 +41,15 @@ export function extractMetadata(description: string): Metadata[] {
         let args: any[] = token.substring(startOfValue + 1, token.indexOf(')'))
             .split(',');
 
-        args = args.map((arg) => {
-            if (arg.startsWith("'") || arg.startsWith('"')) {
-                return arg.substring(1, arg.length - 1);
-            } else if (arg === 'true' || arg === 'false') {
+        args = args.map((arg: string) => {
+            arg = arg.trim();
+            arg = arg.replace(/'|"/g, '');
+
+            const asInt = Number.parseInt(arg);
+
+            if (arg === 'true' || arg === 'false') {
                 return Boolean(arg);
-            }
+            } else if (asInt || asInt === 0) return asInt;
 
             return arg;
         });
