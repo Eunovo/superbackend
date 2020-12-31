@@ -43,7 +43,9 @@ describe("test authentication plugin", () => {
             enumerable: false
         });
 
-        const authService = UsernamePasswordAuthPlugin(User, repo, service);
+        const authPlugin = new UsernamePasswordAuthPlugin(gqlSchema);
+
+        const authService: any = authPlugin.transformService(User, repo, service);
 
         await authService.create({ username, password });
         await authService.authenticate(username, password);
