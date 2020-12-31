@@ -24,16 +24,26 @@ export class AuthorizationPlugin extends Plugin {
         rolesType.getValues()
             .forEach((role) => {
                 const metadata = extractMetadata(role.description || '');
-                metadata.forEach(({ name: method, args }) => {
+                metadata.forEach(({ name, args }) => {
                     const [modelName, fieldName] = args;
                     const methodRules: any = accessRules.get(modelName) || {};
                     const roleName = role.name.toLowerCase();
-                    methodRules[method] = {
-                        ...methodRules[method],
-                        [roleName]: [
-                            ...(methodRules[method]?.[roleName] || []),
-                            { field: models[modelName].fields[fieldName] }
-                        ]
+
+                    const setRulesFor = (method: string) => {
+                        methodRules[method] = {
+                            ...methodRules[method],
+                            [roleName]: [
+                                ...(methodRules[method]?.[roleName] || []),
+                                { field: models[modelName].fields[fieldName] }
+                            ]
+                        };
+                    }
+
+                    if (name === 'read') {
+                        setRulesFor('findBy');
+                        setRulesFor('findOne');
+                    } else {
+                        setRulesFor(name);
                     }
 
                     accessRules.set(modelName, methodRules);
@@ -50,7 +60,7 @@ export class AuthorizationPlugin extends Plugin {
 
         Object.keys(modelAccessRules).forEach((key) => {
             const accessRules = modelAccessRules[key];
-            service.pre('create', accessMiddleware(accessRules));
+            service.pre(key, accessMiddleware(accessRules));
         });
 
         return service;

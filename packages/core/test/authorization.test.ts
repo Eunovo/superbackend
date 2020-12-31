@@ -38,10 +38,13 @@ describe("Test Authorization", () => {
         const UserService: any = plugin.transformService(User.node, userRepo, new Service());
         const StoreService: any = plugin.transformService(Store.node, storeRepo, new Service());
         UserService.create = function (data: any) {
-            
+
         }
         StoreService.create = async function (context: any, data: any) {
             [context, data] = await this.runPreMiddleware('create', context, data);
+        }
+        StoreService.findBy = async function (context: any, data: any) {
+            [context, data] = await this.runPreMiddleware('findBy', context, data);
         }
 
         await UserService.create({ username: 'novo', role: 'USER' });
@@ -51,8 +54,13 @@ describe("Test Authorization", () => {
             principal: { username: 'novo', role: 'User' }
         };
 
-        await StoreService.create(context, { owner: 'novo' });
-        expect(StoreService.create(context, { owner: 'ben' }))
-            .rejects.toThrow();
+        const testAuth = async (method: string, ...args: any[]) => {
+            await StoreService[method](context, { owner: 'novo' }, ...args);
+            expect(StoreService[method](context, { owner: 'ben' }, ...args))
+                .rejects.toThrow();
+        }
+
+        await testAuth('create');
+        await testAuth('findBy');
     });
 });
