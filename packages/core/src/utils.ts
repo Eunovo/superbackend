@@ -23,36 +23,36 @@ export function extractModelsFrom(gqlSchema: GraphQLSchema): Models {
 
 export function extractMetadata(description: string): Metadata[] {
     const metadata: Metadata[] = [];
-    description.split("\n").forEach((token) => {
-        token.split(" ").forEach((token) => {
-            if (!token.startsWith('@')) {
-                return;
-            }
 
-            const startOfValue = token.indexOf('(');
-            if (startOfValue === -1) {
-                metadata.push({
-                    name: token.substring(1),
-                    args: [true]
-                });
-                return;
-            }
+    const metadataRegex = new RegExp(/@((\w*\(.*\))|(\w*))/gm);
 
-            let name = token.substring(1, startOfValue).toLowerCase();
-            let args: any[] = token.substring(startOfValue + 1, token.indexOf(')')).split(',');
+    description.match(metadataRegex)?.forEach((token) => {
 
-            args = args.map((arg) => {
-                if (arg.startsWith("'") || arg.startsWith('"')) {
-                    return arg.substring(1, arg.length - 1);
-                } else if (arg === 'true' || arg === 'false') {
-                    return Boolean(arg);
-                }
-
-                return arg;
+        const startOfValue = token.indexOf('(');
+        if (startOfValue === -1) {
+            metadata.push({
+                name: token.substring(1),
+                args: [true]
             });
+            return;
+        }
 
-            metadata.push({ name, args });
+        let name = token.substring(1, startOfValue).toLowerCase();
+        let args: any[] = token.substring(startOfValue + 1, token.indexOf(')'))
+            .split(',');
+
+        args = args.map((arg) => {
+            if (arg.startsWith("'") || arg.startsWith('"')) {
+                return arg.substring(1, arg.length - 1);
+            } else if (arg === 'true' || arg === 'false') {
+                return Boolean(arg);
+            }
+
+            return arg;
         });
+
+        metadata.push({ name, args });
+
     });
 
     return metadata;
