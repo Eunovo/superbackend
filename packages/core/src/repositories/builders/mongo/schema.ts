@@ -49,8 +49,8 @@ function getDefinition(field: GraphQLField<any, any>) {
     }
 
     const metadata = extractMetadata(field.description || "");
-    metadata.forEach(({ name, value }) => {
-        definition[name] = value;
+    metadata.forEach(({ name, args }) => {
+        definition[name] = args[0];
     });
 
     return definition;

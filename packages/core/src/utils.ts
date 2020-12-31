@@ -15,7 +15,7 @@ export function extractModelsFrom(gqlSchema: GraphQLSchema): GraphQLObjectType[]
 
 interface Metadata {
     name: string;
-    value: any;
+    args: any[];
 }
 
 export function extractMetadata(description: string): Metadata[] {
@@ -30,21 +30,25 @@ export function extractMetadata(description: string): Metadata[] {
             if (startOfValue === -1) {
                 metadata.push({
                     name: token.substring(1),
-                    value: true
+                    args: [true]
                 });
                 return;
             }
 
             let name = token.substring(1, startOfValue).toLowerCase();
-            let value: any = token.substring(startOfValue + 1, token.indexOf(')'));
+            let args: any[] = token.substring(startOfValue + 1, token.indexOf(')')).split(',');
 
-            if (value.startsWith("'") || value.startsWith('"')) {
-                value = value.substring(1, value.length - 1);
-            } else if (value === 'true' || value === 'false') {
-                value = Boolean(value);
-            }
+            args = args.map((arg) => {
+                if (arg.startsWith("'") || arg.startsWith('"')) {
+                    return arg.substring(1, arg.length - 1);
+                } else if (arg === 'true' || arg === 'false') {
+                    return Boolean(arg);
+                }
 
-            metadata.push({ name, value });
+                return arg;
+            });
+
+            metadata.push({ name, args });
         });
     });
 
