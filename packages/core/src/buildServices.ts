@@ -25,8 +25,8 @@ export function buildServices(
         const name = node.name;
         const repo: Repository = buildRepo(node as GraphQLObjectType);
 
-        const service = plugins.reduce((prev: Service, cur) => {
-            return cur(node, repo, prev);
+        const service = plugins.reduce((prev: Service, plugin) => {
+            return plugin.transformService(node, repo, prev);
         }, new Service());
         
         return { ...prev, [name]: service };
