@@ -45,7 +45,7 @@ export class Field {
     private extractForeignKey() {
         for (let i in this.metadata) {
             const { name, args } = this.metadata[i];
-            if (name === 'manytoone') {
+            if (name === 'manytoone' || name === 'onetomany') {
                 return args;
             }
         };
