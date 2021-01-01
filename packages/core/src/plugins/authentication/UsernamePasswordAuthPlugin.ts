@@ -1,23 +1,26 @@
-import { GraphQLField, GraphQLObjectType } from "graphql";
 import { extendService, Plugin } from "../Plugin";
-import { extractMetadata, getMetadata } from "../../utils";
 import { AuthService } from "./UsernamePasswordAuthService";
 import { Repository } from "../../repositories";
 import { Service } from "../../Service";
+import { Field, Model } from "../../Model";
+
 
 export class UsernamePasswordAuthPlugin extends Plugin {
 
-    transformService(node: GraphQLObjectType, repo: Repository, service: Service) {
-        if (!getMetadata(node.description || '', 'usernamepasswordauth'))
+    transformService(model: Model, repo: Repository, service: Service) {
+        const isAuthEnabled = model.metadata
+            .find(({ name }) => name === 'usernamepasswordauth');
+        if (!isAuthEnabled)
             return service;
 
-        let usernameField: GraphQLField<any, any> | undefined;
-        let passwordField: GraphQLField<any, any> | undefined;
-        Object.values(node.getFields())
+        let usernameField: Field | undefined;
+        let passwordField: Field | undefined;
+        Object.values(model.fields)
             .forEach((field) => {
-                const metadata = extractMetadata(field.description || '');
-                let usernameCheck = metadata.find((value) => value.name === 'username');
-                let passwordCheck = metadata.find((value) => value.name === 'password');
+                let usernameCheck = field.metadata
+                    .find(({ name }) => name === 'username');
+                let passwordCheck = field.metadata
+                    .find(({ name }) => name === 'password');
 
                 if (usernameCheck) usernameField = field;
                 else if (passwordCheck) passwordField = field;

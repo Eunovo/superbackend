@@ -35,8 +35,8 @@ describe("Test Authorization", () => {
 
         const plugin = new AuthorizationPlugin(gqlSchema, { User, Store });
 
-        const UserService: any = plugin.transformService(User.node, userRepo, new Service());
-        const StoreService: any = plugin.transformService(Store.node, storeRepo, new Service());
+        const UserService: any = plugin.transformService(User, userRepo, new Service());
+        const StoreService: any = plugin.transformService(Store, storeRepo, new Service());
         UserService.create = function (data: any) {
 
         }

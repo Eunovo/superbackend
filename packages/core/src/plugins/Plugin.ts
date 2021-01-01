@@ -1,7 +1,8 @@
-import { GraphQLObjectType, GraphQLSchema } from "graphql";
+import { GraphQLSchema } from "graphql";
 import { Models } from "../utils";
 import { Repository } from "../repositories";
 import { Middleware, Service } from "../Service";
+import { Model } from "../Model";
 
 export class Plugin<T = any> {
     constructor(
@@ -9,7 +10,7 @@ export class Plugin<T = any> {
         protected models: Models
     ) {};
 
-    transformService(node: GraphQLObjectType, repo: Repository, service: Service) {
+    transformService(model: Model, repo: Repository, service: Service) {
         return service;
     };
 }

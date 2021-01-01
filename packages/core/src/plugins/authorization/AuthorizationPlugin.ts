@@ -1,4 +1,5 @@
-import { GraphQLEnumType, GraphQLObjectType, GraphQLSchema, isEnumType } from "graphql";
+import { GraphQLEnumType, GraphQLSchema, isEnumType } from "graphql";
+import { Model } from "../../Model";
 import { Repository } from "../../repositories";
 import { Service } from "../../Service";
 import { extractMetadata, Models } from "../../utils";
@@ -65,8 +66,8 @@ export class AuthorizationPlugin extends Plugin {
         return accessRules;
     }
 
-    transformService(node: GraphQLObjectType, repo: Repository, service: Service) {
-        const modelAccessRules = this.accessRules.get(node.name);
+    transformService(model: Model, repo: Repository, service: Service) {
+        const modelAccessRules = this.accessRules.get(model.name);
 
         if (!modelAccessRules) return service;
 
