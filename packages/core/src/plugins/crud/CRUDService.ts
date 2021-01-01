@@ -19,7 +19,7 @@ export class CRUDService extends Service {
 
     }
 
-    findBy(filter: any, options: any) {
+    findMany(filter: any, options: any) {
 
     }
 

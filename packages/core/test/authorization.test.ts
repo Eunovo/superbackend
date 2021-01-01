@@ -43,8 +43,8 @@ describe("Test Authorization", () => {
         StoreService.create = async function (context: any, data: any) {
             [context, data] = await this.runPreMiddleware('create', context, data);
         }
-        StoreService.findBy = async function (context: any, data: any) {
-            [context, data] = await this.runPreMiddleware('findBy', context, data);
+        StoreService.findMany = async function (context: any, data: any) {
+            [context, data] = await this.runPreMiddleware('findMany', context, data);
         }
 
         await UserService.create({ username: 'novo', role: 'USER' });
@@ -61,6 +61,6 @@ describe("Test Authorization", () => {
         }
 
         await testAuth('create');
-        await testAuth('findBy');
+        await testAuth('findMany');
     });
 });

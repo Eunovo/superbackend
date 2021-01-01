@@ -43,7 +43,7 @@ export class AuthorizationPlugin extends Plugin {
 
                     if (name === 'read') {
                         const readRule = new ReadRule(field);
-                        setRulesFor('findBy', readRule);
+                        setRulesFor('findMany', readRule);
                         setRulesFor('findOne', readRule);
                     } else if (name === 'update') {
                         const updateRule = new UpdateRule(field);
