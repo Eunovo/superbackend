@@ -27,7 +27,7 @@ export function buildServices(
             const repo: Repository = buildRepo(model);
 
             const service = plugins.reduce((prev: Service, plugin) => {
-                return plugin.transformService(model.node, repo, prev);
+                return plugin.transformService(model, repo, prev);
             }, new Service());
 
             return { ...prev, [model.name]: service };
