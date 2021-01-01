@@ -7,7 +7,7 @@ const schemaPath = join(__dirname, "./mock.graphql");
 
 test("it should create CRUD services for models defined in the gql schema", () => {
     const services: any = buildServices(
-        schemaPath, buildMongoRepo, [CRUDPlugin]
+        schemaPath, buildMongoRepo, []
     );
     expect(services.User).toBeDefined();
 });

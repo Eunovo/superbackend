@@ -1,6 +1,11 @@
 import { GraphQLNamedType, GraphQLObjectType, GraphQLSchema } from "graphql";
+import { Model, Metadata } from "./Model";
 
-export function extractModelsFrom(gqlSchema: GraphQLSchema): GraphQLObjectType[] {
+export type Models<T = any> = {
+    [P in keyof T]: Model
+}
+
+export function extractModelsFrom(gqlSchema: GraphQLSchema): Models {
     const typeMap = gqlSchema.getTypeMap();
     return Object.keys(typeMap)
         .reduce((prev: any, key: string) => {
@@ -9,43 +14,48 @@ export function extractModelsFrom(gqlSchema: GraphQLSchema): GraphQLObjectType[]
 
             if (!isModel(node)) return prev;
 
-            return [...prev, node];
-        }, []);
-}
-
-interface Metadata {
-    name: string;
-    value: any;
+            return {
+                ...prev,
+                [node.name]: new Model(node as GraphQLObjectType)
+            };
+        }, {});
 }
 
 export function extractMetadata(description: string): Metadata[] {
     const metadata: Metadata[] = [];
-    description.split("\n").forEach((token) => {
-        token.split(" ").forEach((token) => {
-            if (!token.startsWith('@')) {
-                return;
-            }
 
-            const startOfValue = token.indexOf('(');
-            if (startOfValue === -1) {
-                metadata.push({
-                    name: token.substring(1),
-                    value: true
-                });
-                return;
-            }
+    const metadataRegex = new RegExp(/@((\w*\(.*\))|(\w*))/gm);
 
-            let name = token.substring(1, startOfValue).toLowerCase();
-            let value: any = token.substring(startOfValue + 1, token.indexOf(')'));
+    description.match(metadataRegex)?.forEach((token) => {
 
-            if (value.startsWith("'") || value.startsWith('"')) {
-                value = value.substring(1, value.length - 1);
-            } else if (value === 'true' || value === 'false') {
-                value = Boolean(value);
-            }
+        const startOfValue = token.indexOf('(');
+        if (startOfValue === -1) {
+            metadata.push({
+                name: token.substring(1),
+                args: [true]
+            });
+            return;
+        }
 
-            metadata.push({ name, value });
+        let name = token.substring(1, startOfValue).toLowerCase();
+        let args: any[] = token.substring(startOfValue + 1, token.indexOf(')'))
+            .split(',');
+
+        args = args.map((arg: string) => {
+            arg = arg.trim();
+            arg = arg.replace(/'|"/g, '');
+
+            const asInt = Number.parseInt(arg);
+
+            if (arg === 'true' || arg === 'false') {
+                return Boolean(arg);
+            } else if (asInt || asInt === 0) return asInt;
+
+            return arg;
         });
+
+        metadata.push({ name, args });
+
     });
 
     return metadata;

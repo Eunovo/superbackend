@@ -4,6 +4,7 @@ import { RepoBuilder, Repository } from "./repositories";
 import { extractModelsFrom } from "./utils";
 import { Plugin } from "./plugins";
 import { Service } from "./Service";
+import { Model } from "./Model";
 
 
 /**
@@ -14,21 +15,21 @@ import { Service } from "./Service";
  */
 export function buildServices(
     schemaPath: string,
-    buildRepo: RepoBuilder, 
+    buildRepo: RepoBuilder,
     plugins: Plugin[]
 ) {
     const schemaString = readFileSync(schemaPath).toString();
     const gqlSchema = buildSchema(schemaString);
     const models = extractModelsFrom(gqlSchema);
 
-    return models.reduce((prev: any, node: GraphQLObjectType) => {
-        const name = node.name;
-        const repo: Repository = buildRepo(node as GraphQLObjectType);
+    return Object.values(models)
+        .reduce((prev: any, model: Model) => {
+            const repo: Repository = buildRepo(model);
 
-        const service = plugins.reduce((prev: Service, cur) => {
-            return cur(node, repo, prev);
-        }, new Service());
-        
-        return { ...prev, [name]: service };
-    }, {});
+            const service = plugins.reduce((prev: Service, plugin) => {
+                return plugin.transformService(model, repo, prev);
+            }, new Service());
+
+            return { ...prev, [model.name]: service };
+        }, {});
 }

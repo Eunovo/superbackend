@@ -18,7 +18,7 @@ describe("test authentication plugin", () => {
         }
         `;
         const gqlSchema = buildSchema(gqlSchemaString);
-        const User = extractModelsFrom(gqlSchema)[0];
+        const { User } = extractModelsFrom(gqlSchema);
 
         const username = 'test';
         const password = 'password';
@@ -43,7 +43,9 @@ describe("test authentication plugin", () => {
             enumerable: false
         });
 
-        const authService = UsernamePasswordAuthPlugin(User, repo, service);
+        const authPlugin = new UsernamePasswordAuthPlugin(gqlSchema, { User });
+        const authService: any = authPlugin
+            .transformService(User, repo, service);
 
         await authService.create({ username, password });
         await authService.authenticate(username, password);

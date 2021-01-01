@@ -1,8 +1,19 @@
-import { GraphQLObjectType } from "graphql";
+import { GraphQLSchema } from "graphql";
+import { Models } from "../utils";
 import { Repository } from "../repositories";
 import { Middleware, Service } from "../Service";
+import { Model } from "../Model";
 
-export type Plugin = (node: GraphQLObjectType, repo: Repository, service: Service) => any;
+export class Plugin<T = any> {
+    constructor(
+        protected schema: GraphQLSchema,
+        protected models: Models
+    ) {};
+
+    transformService(model: Model, repo: Repository, service: Service) {
+        return service;
+    };
+}
 
 
 export function extendService(service: Service, newService: Service) {
