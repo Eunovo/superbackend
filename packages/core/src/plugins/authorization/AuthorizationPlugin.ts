@@ -3,6 +3,7 @@ import { Repository } from "../../repositories";
 import { Service } from "../../Service";
 import { extractMetadata, Models } from "../../utils";
 import { Plugin } from "../Plugin";
+import { CreateRule, DeleteRule, ReadRule, Rule, UpdateRule } from "./Rules";
 
 export class AuthorizationPlugin extends Plugin {
 
@@ -26,24 +27,35 @@ export class AuthorizationPlugin extends Plugin {
                 const metadata = extractMetadata(role.description || '');
                 metadata.forEach(({ name, args }) => {
                     const [modelName, fieldName] = args;
+                    const field = models[modelName].fields[fieldName];
                     const methodRules: any = accessRules.get(modelName) || {};
                     const roleName = role.name.toLowerCase();
 
-                    const setRulesFor = (method: string) => {
+                    const setRulesFor = (method: string, rule: Rule) => {
                         methodRules[method] = {
                             ...methodRules[method],
                             [roleName]: [
                                 ...(methodRules[method]?.[roleName] || []),
-                                { field: models[modelName].fields[fieldName] }
+                                rule
                             ]
                         };
                     }
 
                     if (name === 'read') {
-                        setRulesFor('findBy');
-                        setRulesFor('findOne');
+                        const readRule = new ReadRule(field);
+                        setRulesFor('findBy', readRule);
+                        setRulesFor('findOne', readRule);
+                    } else if (name === 'update') {
+                        const updateRule = new UpdateRule(field);
+                        setRulesFor('updateOne', updateRule);
+                        setRulesFor('updateMany', updateRule);
+                    } else if (name === 'delete') {
+                        const deleteRule = new DeleteRule(field);
+                        setRulesFor('removeOne', deleteRule);
+                        setRulesFor('removeMany', deleteRule);
                     } else {
-                        setRulesFor(name);
+                        const createRule = new CreateRule(field);
+                        setRulesFor(name, createRule);
                     }
 
                     accessRules.set(modelName, methodRules);
@@ -69,20 +81,21 @@ export class AuthorizationPlugin extends Plugin {
 }
 
 function accessMiddleware(accessRules: any) {
-    return async (context: any, data: any, ...args: any[]) => {
+    return async (context: any, ...args: any[]) => {
         if (!context.principal) throw new Error('Unauthorised');
         const principal = context.principal;
 
         if (!principal.role) throw new Error('Unauthorised');
 
         const roleAccessRules = accessRules[principal.role.toLowerCase()];
-        const isAllowed = roleAccessRules.reduce((prev: boolean, rule: any) => {
-            const { name, foreignKey } = rule.field;
-            return prev && (principal[foreignKey] === data[name]);
-        }, true);
+        const isAllowed = roleAccessRules
+            .reduce(
+                (prev: boolean, rule: Rule) => prev && rule.check(principal, ...args),
+                true
+            );
 
         if (!isAllowed) throw new Error('Unauthorised');
 
-        return [context, data, ...args];
+        return [context, ...args];
     }
 }
