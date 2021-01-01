@@ -2,9 +2,7 @@ import {
     getNamedType,
     getNullableType,
     GraphQLEnumType,
-    GraphQLField,
     GraphQLNamedType,
-    GraphQLObjectType,
     GraphQLType,
     isCompositeType,
     isEnumType,
@@ -12,23 +10,27 @@ import {
     isNonNullType
 } from "graphql";
 import { Schema, SchemaTypes } from "mongoose";
-import { extractMetadata, isModel } from "../../../utils";
+import { Field, Model } from "../../../Model";
+import { isModel } from "../../../utils";
 
-export function buildSchema(gqlObject: GraphQLObjectType): Schema {
-    const fields = gqlObject.getFields();
-
+/**
+ * Build the mongoose schema for
+ * @param model 
+ */
+export function buildSchema(model: Model): Schema {
     return new Schema(
-        Object.keys(fields).reduce((prev, key: string) => {
-            const field = fields[key];
-            
-            if (key === '_id') return prev;
-
-            return { ...prev, [key]: getDefinition(field) };
+        Object.values(model.fields).reduce((prev, field: Field) => {
+            if (field.name === '_id') return prev;
+            return { ...prev, [field.name]: getDefinition(field) };
         }, {})    
     );
 }
 
-function getDefinition(field: GraphQLField<any, any>) {
+
+/**
+ * Return the `SchemaDefinition` for @param field
+ */
+function getDefinition(field: Field) {
     const definition: any = {};
     let type = field.type;
 
@@ -48,14 +50,17 @@ function getDefinition(field: GraphQLField<any, any>) {
         definition.ref = (<GraphQLNamedType>type).name;
     }
 
-    const metadata = extractMetadata(field.description || "");
-    metadata.forEach(({ name, args }) => {
+    field.metadata.forEach(({ name, args }) => {
         definition[name] = args[0];
     });
 
     return definition;
 }
 
+
+/** 
+ * Convert @param type to `SchemaTypes` 
+ */
 function getSchemaType(type: GraphQLType): any {
     if (isListType(type)) {
         return [getSchemaType(getNamedType(type))];

@@ -6,7 +6,7 @@ import { handleMongooseError } from "./error-handler";
 import { buildSchema } from "./schema";
 
 export const buildMongoRepo: RepoBuilder = (modelObj: Model) => {
-    const mongooseSchema = buildSchema(modelObj.node);
+    const mongooseSchema = buildSchema(modelObj);
 
     mongooseSchema.post('save', handleMongooseError);
     mongooseSchema.post('insertMany', handleMongooseError);
