@@ -10,4 +10,13 @@ type User {
     @unique
     """
     username: String!
+    """
+    @default('user')
+    """
+    role: Role!
+}
+
+enum Role {
+    user
+    admin
 }

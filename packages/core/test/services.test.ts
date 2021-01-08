@@ -2,14 +2,20 @@ import "jest";
 import { connect, connection } from "mongoose";
 import { join } from "path";
 import { buildServices, buildMongoRepo } from "../src";
-import { CRUDPlugin } from "../src/plugins/crud";
+import {
+    CRUDPlugin,
+    UsernamePasswordAuthPlugin,
+    AuthorizationPlugin
+} from "../src/plugins";
 
 const schemaPath = join(__dirname, "./mock.graphql");
 const DB_URL = "mongodb://localhost:27017/AthenaTest";
 
 const { services }: any = buildServices(
     schemaPath, buildMongoRepo, [
-        new CRUDPlugin()
+        new CRUDPlugin(),
+        new UsernamePasswordAuthPlugin(),
+        new AuthorizationPlugin()
     ]
 );
 
