@@ -1,4 +1,4 @@
-import { buildSchema, GraphQLObjectType } from "graphql";
+import { buildSchema } from "graphql";
 import { readFileSync } from "fs";
 import { RepoBuilder, Repository } from "./repositories";
 import { extractModelsFrom } from "./utils";
@@ -36,6 +36,6 @@ export function buildServices(
     plugins.forEach((plugin) => {
         plugin.transformServices(models, repos, services);
     });
-    
-    return services;
+
+    return { repos, services };
 }
