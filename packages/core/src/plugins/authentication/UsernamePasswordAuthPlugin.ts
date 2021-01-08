@@ -3,11 +3,20 @@ import { AuthService } from "./UsernamePasswordAuthService";
 import { Repository } from "../../repositories";
 import { Service } from "../../Service";
 import { Field, Model } from "../../Model";
+import { Models, Repositories, Services } from "../../utils";
 
 
 export class UsernamePasswordAuthPlugin extends Plugin {
 
-    transformService(model: Model, repo: Repository, service: Service) {
+    transformServices(models: Models, repos: Repositories, services: Services) {
+        Object.keys(models)
+            .forEach((name) => {
+                services[name] = this.getAuthService(
+                    models[name], repos[name], services[name])
+            });
+    }
+
+    private getAuthService(model: Model, repo: Repository, service: Service) {
         const isAuthEnabled = model.metadata
             .find(({ name }) => name === 'usernamepasswordauth');
         if (!isAuthEnabled)

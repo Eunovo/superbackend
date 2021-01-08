@@ -30,13 +30,22 @@ describe("Test Authorization", () => {
         `;
         const gqlSchema = buildSchema(schemaString);
         const { User, Store } = extractModelsFrom(gqlSchema);
-        const userRepo: any = {};
-        const storeRepo: any = {};
+        const repos: any = {
+            'User': {},
+            'Store': {}
+        }
 
         const plugin = new AuthorizationPlugin(gqlSchema, { User, Store });
+        const services = {
+            'User': new Service(),
+            'Store': new Service()
+        };
 
-        const UserService: any = plugin.transformService(User, userRepo, new Service());
-        const StoreService: any = plugin.transformService(Store, storeRepo, new Service());
+        plugin.transformServices({ User, Store }, repos, services);
+
+        const UserService: any = services.User;
+        const StoreService: any = services.Store;
+
         UserService.create = function (data: any) {
 
         }

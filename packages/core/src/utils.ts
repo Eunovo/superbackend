@@ -1,9 +1,15 @@
 import { GraphQLNamedType, GraphQLObjectType, GraphQLSchema } from "graphql";
 import { Model, Metadata } from "./Model";
+import { Repository } from "./repositories";
+import { Service } from "./Service";
 
-export type Models<T = any> = {
-    [P in keyof T]: Model
+type MapAll<T = any, Y = any> = {
+    [P in keyof T]: Y
 }
+
+export type Models<T = any> = MapAll<T, Model>;
+export type Repositories<T = any> = MapAll<T, Repository>;
+export type Services<T = any> = MapAll<T, Service>;
 
 export function extractModelsFrom(gqlSchema: GraphQLSchema): Models {
     const typeMap = gqlSchema.getTypeMap();

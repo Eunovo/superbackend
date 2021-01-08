@@ -1,8 +1,7 @@
 import { GraphQLEnumType, GraphQLSchema, isEnumType } from "graphql";
 import { Model } from "../../Model";
-import { Repository } from "../../repositories";
 import { Service } from "../../Service";
-import { extractMetadata, Models } from "../../utils";
+import { extractMetadata, Models, Repositories, Services } from "../../utils";
 import { Plugin } from "../Plugin";
 import { CreateRule, DeleteRule, ReadRule, Rule, UpdateRule } from "./Rules";
 
@@ -18,6 +17,26 @@ export class AuthorizationPlugin extends Plugin {
             throw new Error("Role must be defined for authorization to work");
 
         this.accessRules = this.parseAccessRules(models, rolesType);
+    }
+
+    transformServices(models: Models, repos: Repositories, services: Services) {
+        Object.values(models)
+            .forEach((model) => {
+                this.applyAccessRules(model, services[model.name]);
+            });
+    }
+
+    private applyAccessRules(model: Model, service: Service) {
+        const modelAccessRules = this.accessRules.get(model.name);
+
+        if (!modelAccessRules) return service;
+
+        Object.keys(modelAccessRules).forEach((key) => {
+            const accessRules = modelAccessRules[key];
+            service.pre(key, accessMiddleware(accessRules));
+        });
+
+        return service;
     }
 
     private parseAccessRules(models: Models, rolesType: GraphQLEnumType) {
@@ -64,19 +83,6 @@ export class AuthorizationPlugin extends Plugin {
             });
 
         return accessRules;
-    }
-
-    transformService(model: Model, repo: Repository, service: Service) {
-        const modelAccessRules = this.accessRules.get(model.name);
-
-        if (!modelAccessRules) return service;
-
-        Object.keys(modelAccessRules).forEach((key) => {
-            const accessRules = modelAccessRules[key];
-            service.pre(key, accessMiddleware(accessRules));
-        });
-
-        return service;
     }
 
 }

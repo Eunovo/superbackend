@@ -22,14 +22,20 @@ export function buildServices(
     const gqlSchema = buildSchema(schemaString);
     const models = extractModelsFrom(gqlSchema);
 
-    return Object.values(models)
+    const repos = Object.values(models)
         .reduce((prev: any, model: Model) => {
             const repo: Repository = buildRepo(model);
-
-            const service = plugins.reduce((prev: Service, plugin) => {
-                return plugin.transformService(model, repo, prev);
-            }, new Service());
-
-            return { ...prev, [model.name]: service };
+            return { ...prev, [model.name]: repo };
         }, {});
+
+    const services = Object.values(models)
+        .reduce((prev: any, model: Model) => {
+            return { ...prev, [model.name]: new Service() };
+        }, {});
+
+    plugins.forEach((plugin) => {
+        plugin.transformServices(models, repos, services);
+    });
+    
+    return services;
 }
