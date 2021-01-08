@@ -1,15 +1,14 @@
-import { GraphQLSchema } from "graphql";
 import { Models, Repositories, Services } from "../utils";
 import { Middleware, Service } from "../Service";
+import { GraphQLSchema } from "graphql";
 
 
 export abstract class Plugin<T = any> {
-    constructor(
-        protected schema: GraphQLSchema,
-        protected models: Models
-    ) {};
+
+    setup(schema: GraphQLSchema, models: Models) {}
 
     abstract transformServices(models: Models, repos: Repositories, services: Services): void
+
 }
 
 

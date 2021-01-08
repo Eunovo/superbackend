@@ -35,7 +35,8 @@ describe("Test Authorization", () => {
             'Store': {}
         }
 
-        const plugin = new AuthorizationPlugin(gqlSchema, { User, Store });
+        const plugin = new AuthorizationPlugin();
+        plugin.setup(gqlSchema, { User, Store });
         const services = {
             'User': new Service(),
             'Store': new Service()

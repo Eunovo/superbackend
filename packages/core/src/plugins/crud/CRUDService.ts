@@ -13,16 +13,16 @@ export class CRUDService extends Service {
         private services: Services
     ) {
         super();
-        this.repo = this.repos[name];
+        this.repo = this.repos[this.name];
     }
     
-    async create(context: any, input: any) {
+    async create(input: any, context: any = {}) {
         [context, input] = await this.runPreMiddleware(
             'create', context, input);
         return this.repo.create(input)
     }
 
-    async findOne(context: any, filter: any) {
+    async findOne(filter: any, context: any = {}) {
         [context, filter] = await this.runPreMiddleware(
             'findOne', context, filter);
         const result = await this.repo.findOne(filter);
@@ -30,30 +30,34 @@ export class CRUDService extends Service {
         return result;
     }
 
-    async findMany(context: any, filter: any, options: any) {
+    async findMany(filter: any, options?: any, context: any = {}) {
         [context, filter, options] = await this.runPreMiddleware(
             'findMany', context, filter, options);
+        return this.repo.findMany(filter, options);
     }
 
-    async updateOne(context: any, input: any, filter: any) {
+    async updateOne(input: any, filter: any, context: any = {}) {
         [context, input, filter] = await this.runPreMiddleware(
             'updateOne', context, input, filter);
         await this.repo.updateOne(filter, input);
     }
 
-    async updateMany(context: any, input: any, filter: any) {
+    async updateMany(input: any, filter: any, context: any = {}) {
         [context, input, filter] = await this.runPreMiddleware(
             'updateMany', context, input, filter);
+        return this.repo.updateMany(filter, input);
     }
 
-    async removeOne(context: any, filter: any) {
+    async removeOne(filter: any, context: any = {}) {
         [context, filter] = await this.runPreMiddleware(
             'removeOne', context, filter);
+        return this.repo.removeOne(filter);
     }
 
-    async removeMany(context: any, filter: any) {
+    async removeMany(filter: any, context: any = {}) {
         [context, filter] = await this.runPreMiddleware(
             'removeMany', context, filter);
+        return this.repo.removeMany(filter);
     }
 
 }

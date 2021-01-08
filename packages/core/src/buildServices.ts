@@ -34,6 +34,7 @@ export function buildServices(
         }, {});
 
     plugins.forEach((plugin) => {
+        plugin.setup(gqlSchema, models);
         plugin.transformServices(models, repos, services);
     });
 

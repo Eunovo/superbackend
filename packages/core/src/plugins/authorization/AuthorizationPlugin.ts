@@ -9,9 +9,12 @@ export class AuthorizationPlugin extends Plugin {
 
     private accessRules: Map<string, any>;
 
-    constructor(schema: GraphQLSchema, models: Models) {
-        super(schema, models);
+    constructor() {
+        super();
+        this.accessRules = new Map();
+    }
 
+    setup(schema: GraphQLSchema, models: Models) {
         const rolesType = schema.getType('Role');
         if (!rolesType || !isEnumType(rolesType))
             throw new Error("Role must be defined for authorization to work");
