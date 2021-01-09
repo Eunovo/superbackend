@@ -43,7 +43,7 @@ describe("test authentication plugin", () => {
             enumerable: false
         });
 
-        const authPlugin = new UsernamePasswordAuthPlugin(gqlSchema, models);
+        const authPlugin = new UsernamePasswordAuthPlugin();
         authPlugin
             .transformServices(models, { 'User': repo }, { 'User': service });
 
