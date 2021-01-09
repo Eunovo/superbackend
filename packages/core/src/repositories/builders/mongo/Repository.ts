@@ -9,6 +9,7 @@ export class MongoRepository implements Repository {
         await this.model.init();
         const model = new this.model(data);
         await model.save();
+        return model._id;
     }
 
     async findOne(filter: any) {

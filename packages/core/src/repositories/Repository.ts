@@ -1,8 +1,8 @@
 export interface Repository {
  
-    create(data: any): Promise<void>;
+    create(data: any): Promise<string>;
 
-    findOne(filter: any): Promise<any>;
+    findOne(filter: any): Promise<any | null>;
 
     findMany(filter: any, options?: any): Promise<any[]>;
 

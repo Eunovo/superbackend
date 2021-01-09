@@ -47,18 +47,18 @@ describe("CRUD test", () => {
     test("it should create data and save to db", async () => {
         let username = 'experiment';
 
-        await services.User.create({ username });
-        let result = await services.User.findOne({ username });
+        const _id = await services.User.create({ username });
+        let result = await services.User.findOne({ _id });
         expect(result.username).toBe(username);
     
-        const OldUsername = username;
+        const oldUsername = username;
         username = 'updated'
-        await services.User.updateOne({ username }, { username: OldUsername });
+        await services.User.updateOne({ username }, { username: oldUsername });
 
         result = await services.User.findOne({ username });
         expect(result.username).toBe(username);
 
-        expect(services.User.findOne({ username: OldUsername }))
+        expect(services.User.findOne({ username: oldUsername }))
             .rejects.toHaveProperty('message', 'Not Found');
 
         await services.User.removeOne({ username });
