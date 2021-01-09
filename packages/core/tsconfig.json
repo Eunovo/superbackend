@@ -3,6 +3,7 @@
   
     "compilerOptions": {
       "preserveConstEnums": true,
+      "declaration": true,
       "outDir": "dist"
     },
   
