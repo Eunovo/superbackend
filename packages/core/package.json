@@ -1,10 +1,13 @@
 {
   "name": "@eunovo/superbackend",
+  "version": "0.1.1",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "author": "Eunovo",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
+    "prepublish": "yarn build",
     "test": "jest"
   },
   "devDependencies": {
@@ -19,6 +22,5 @@
     "bcrypt": "^5.0.0",
     "graphql": "^15.4.0",
     "mongoose": "^5.11.8"
-  },
-  "version": "0.1.0"
+  }
 }
