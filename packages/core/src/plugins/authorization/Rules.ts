@@ -8,14 +8,14 @@ export abstract class Rule {
             throw new Error("The target auth field does not have a foreign key");
     }
 
-    abstract check(principal: any, ...args: any[]): boolean;
+    abstract check(principal: any, args: any): boolean;
 }
 
 export class CreateRule extends Rule {
 
-    check(principal: any, data: any) {
+    check(principal: any, { input }: any) {
         return principal[this.field.foreignKey || '']
-            === data[this.field.name];
+            === input[this.field.name];
     }
 
 }
@@ -28,7 +28,7 @@ export class ReadRule extends Rule {
      * @param principal 
      * @param filter 
      */
-    check(principal: any, filter: any) {
+    check(principal: any, { filter }: any) {
         // TODO extensive filter check
         return principal[this.field.foreignKey || '']
             === filter[this.field.name];
@@ -49,11 +49,11 @@ export class UpdateRule extends Rule {
         this.readRule = new ReadRule(field);
     }
 
-    check(principal: any, filter: any, data: any) {
+    check(principal: any, args: any) {
         // TODO what if certain data can
         // only be written for certain filters
-        return this.readRule.check(principal, filter)
-            && this.writeRule.check(principal, data);
+        return this.readRule.check(principal, args)
+            && this.writeRule.check(principal, args);
     }
 
 }

@@ -18,15 +18,10 @@ export class AuthService extends Service {
     ) {
         super();
         
-        this.pre('create', async (context: any, data: any, ...args: any[]) => {
-            const password = data[passwordField];
+        this.pre('create', async (args: any) => {
+            const password = args.input[passwordField];
             const hashedPassword = await hash(password, SALT_ROUNDS);
-
-            return [
-                context,
-                { ...data, [passwordField]: hashedPassword },
-                ...args
-            ];
+            args.input[passwordField] = hashedPassword;
         });
     }
 

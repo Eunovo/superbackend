@@ -1,4 +1,4 @@
-export type Middleware = (...args: any[]) => Promise<any>;
+export type Middleware = (args: any) => Promise<void> | void;
 
 export class Service {
     private preMiddleware: Map<string, Middleware[]>;
@@ -9,24 +9,23 @@ export class Service {
         this.postMiddleware = new Map();
     }
 
-    private async runMiddleware(middleware: Middleware[], ...args: any[]) {
+    private async runMiddleware(middleware: Middleware[], args: any) {
         let i = 0;
         while (i < middleware.length) {
-            if (Array.isArray(args)) args = await middleware[i](...args);
-            else args = await middleware[i](args);
+            await middleware[i](args);
             i++;
         }
         return args;
     }
 
-    runPreMiddleware(method: string, ...args: any[]) {
+    runPreMiddleware(method: string, args: any) {
         const middleware = this.preMiddleware.get(method) || [];
-        return this.runMiddleware(middleware, ...args);
+        return this.runMiddleware(middleware, args);
     }
 
-    runPostMiddleware(method: string, ...args: any[]) {
+    runPostMiddleware(method: string, args: any) {
         const middleware = this.postMiddleware.get(method) || [];
-        return this.runMiddleware(middleware, ...args);
+        return this.runMiddleware(middleware, args);
     }
 
     pre(method: string, middleware: Middleware) {

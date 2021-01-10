@@ -50,11 +50,11 @@ describe("Test Authorization", () => {
         UserService.create = function (data: any) {
 
         }
-        StoreService.create = async function (context: any, data: any) {
-            [context, data] = await this.runPreMiddleware('create', context, data);
+        StoreService.create = async function (context: any, input: any) {
+            await this.runPreMiddleware('create', { context, input });
         }
-        StoreService.findMany = async function (context: any, data: any) {
-            [context, data] = await this.runPreMiddleware('findMany', context, data);
+        StoreService.findMany = async function (context: any, filter: any) {
+            await this.runPreMiddleware('findMany', { context, filter });
         }
 
         await UserService.create({ username: 'novo', role: 'USER' });

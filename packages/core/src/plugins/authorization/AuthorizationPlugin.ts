@@ -91,7 +91,8 @@ export class AuthorizationPlugin extends Plugin {
 }
 
 function accessMiddleware(accessRules: any) {
-    return async (context: any, ...args: any[]) => {
+    return async (args: any) => {
+        const { context } = args;
         if (!context.principal) throw new Error('Unauthorised');
         const principal = context.principal;
 
@@ -100,12 +101,11 @@ function accessMiddleware(accessRules: any) {
         const roleAccessRules = accessRules[principal.role.toLowerCase()];
         const isAllowed = roleAccessRules
             .reduce(
-                (prev: boolean, rule: Rule) => prev && rule.check(principal, ...args),
+                (prev: boolean, rule: Rule) =>
+                    prev && rule.check(principal, args),
                 true
             );
 
         if (!isAllowed) throw new Error('Unauthorised');
-
-        return [context, ...args];
     }
 }
