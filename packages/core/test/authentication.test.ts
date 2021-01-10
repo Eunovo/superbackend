@@ -31,7 +31,7 @@ describe("test authentication plugin", () => {
         };
 
         const create = async function (this: Service, data: any) {
-            [testUser] = await this.runPreMiddleware('create', data);
+            [{}, testUser] = await this.runPreMiddleware('create', {}, data);
             expect(testUser.password).not.toEqual(password);
         }
 
