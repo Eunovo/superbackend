@@ -9,7 +9,7 @@ const schemaPath = join(__dirname, "./mock.graphql");
 const schemaString = readFileSync(schemaPath).toString();
 const gqlSchema = buildSchema(schemaString);
 
-const DB_URL = "mongodb://localhost:27017/AthenaTest";
+const DB_URL = "mongodb://localhost:27017/AthenaMongoTest";
 
 describe("Test MongoDB repo builder", () => {
 

@@ -5,15 +5,17 @@ import { buildServices, buildMongoRepo } from "../src";
 import {
     CRUDPlugin,
     UsernamePasswordAuthPlugin,
-    AuthorizationPlugin
+    AuthorizationPlugin,
+    RelationshipPlugin
 } from "../src/plugins";
 
 const schemaPath = join(__dirname, "./mock.graphql");
-const DB_URL = "mongodb://localhost:27017/AthenaTest";
+const DB_URL = "mongodb://localhost:27017/AthenaServicesTest";
 
 const { services }: any = buildServices(
     schemaPath, buildMongoRepo, [
         new CRUDPlugin(),
+        new RelationshipPlugin(),
         new UsernamePasswordAuthPlugin(),
         new AuthorizationPlugin()
     ]
@@ -36,13 +38,13 @@ describe("CRUD test", () => {
         });
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
         const promises = Object.values(connection.models)
             .map((model) => model.deleteMany({}));
         await Promise.all(promises);
-
-        return connection.close();
     });
+
+    afterAll(() => connection.close());
 
     test("it should create data and save to db", async () => {
         let username = 'experiment';
@@ -63,6 +65,15 @@ describe("CRUD test", () => {
 
         await services.User.removeOne({ username });
         expect(services.User.findOne({ username }))
+            .rejects.toHaveProperty('message', 'Not Found');
+    });
+
+    test("it should detect illegal foreign values", async () => {
+        let username = 'username';
+
+        await services.User.create({ username });
+        await services.Store.create({ owner: username });
+        expect(services.Store.create({ owner: 'Illegal' }))
             .rejects.toHaveProperty('message', 'Not Found');
     });
 

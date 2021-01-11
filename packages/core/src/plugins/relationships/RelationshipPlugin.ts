@@ -18,13 +18,16 @@ export class RelationshipPlugin extends Plugin {
                         const foreignService: any = services[field.foreignModel];
 
                         const fetchForeigners = async (args: any) => {
-                            args._foreign = {};
                             const { name, foreignKey } = field;
                             const input = args.input;
                             if (!foreignKey || !input[name]) return;
 
-                            args._foreign[name] = await foreignService
+                            const foreigner = await foreignService
                                 .findOne({ [foreignKey]: input[name] });
+                            args._foreign = {
+                                ...(args.foreign || {}),
+                                [name]: foreigner
+                            }
                         };
 
                         service.pre('create', fetchForeigners);

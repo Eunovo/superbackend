@@ -20,3 +20,13 @@ enum Role {
     user
     admin
 }
+
+"""
+@model
+"""
+type Store {
+    """
+    @OneToOne('User', 'username')
+    """
+    owner: String!
+}

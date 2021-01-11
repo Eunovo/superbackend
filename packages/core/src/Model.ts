@@ -48,7 +48,7 @@ export class Field {
             if (
                 name === 'manytoone' ||
                 name === 'onetomany' ||
-                name === 'onetone'
+                name === 'onetoone'
             ) {
                 return args;
             }
