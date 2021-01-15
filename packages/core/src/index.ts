@@ -1,3 +1,6 @@
+import mongoose from 'mongoose';
+
+export { mongoose };
 export * from './buildServices';
 export * from './repositories';
 export * from './utils';
