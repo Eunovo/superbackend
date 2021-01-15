@@ -13,31 +13,37 @@ export class MongoRepository implements Repository {
     }
 
     async findOne(filter: any) {
-        return this.model.findOne(filter);
+        return this.model.findOne(filter)
+            .exec();
     }
 
     async findMany(filter: any, options?: any) {
         return this.model.find(filter)
             .skip(options?.skip)
-            .limit(options?.limit);
+            .limit(options?.limit)
+            .exec();
     }
 
     async updateOne(filter: any, update: any) {
         await this.model.init();
-        await this.model.updateOne(filter, update);
+        await this.model.updateOne(filter, update)
+            .exec();
     }
 
     async updateMany(filter: any, update: any) {
         await this.model.init();
-        await this.model.updateMany(filter, update);
+        await this.model.updateMany(filter, update)
+            .exec();
     }
 
     async removeOne(filter: any) {
-        await this.model.findOneAndRemove(filter);
+        await this.model.findOneAndRemove(filter)
+            .exec();
     }
 
     async removeMany(filter: any) {
-        await this.model.remove(filter);
+        await this.model.remove(filter)
+            .exec();
     }
 
 }
