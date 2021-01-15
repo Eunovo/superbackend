@@ -21,7 +21,7 @@ export class CRUDService extends Service {
             'create', { context, input });
         
         input = args.input;
-        const id = this.repo.create(input);
+        const id = await this.repo.create(input);
         args = await this.runPostMiddleware(
             'create', { ...args, id });
         
