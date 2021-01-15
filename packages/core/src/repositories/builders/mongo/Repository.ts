@@ -13,8 +13,10 @@ export class MongoRepository implements Repository {
     }
 
     async findOne(filter: any) {
-        return this.model.findOne(filter)
+        const result = await this.model.findOne(filter)
             .exec();
+        if (result?._doc) return result._doc;
+        return result;
     }
 
     async findMany(filter: any, options?: any) {
