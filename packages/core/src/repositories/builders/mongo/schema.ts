@@ -88,8 +88,11 @@ function getSchemaType(type: GraphQLType): any {
 
         case 'date':
             return SchemaTypes.Date;
+
+        case 'string':
+            return SchemaTypes.String;
     
         default:
-            return SchemaTypes.String;
+            return SchemaTypes.Mixed;
     }
 }
