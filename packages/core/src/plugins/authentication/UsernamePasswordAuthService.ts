@@ -17,7 +17,7 @@ export class AuthService extends Service {
         private repo: Repository
     ) {
         super();
-        
+
         this.pre('create', async (args: any) => {
             const password = args.input[passwordField];
             const hashedPassword = await hash(password, SALT_ROUNDS);
@@ -26,6 +26,11 @@ export class AuthService extends Service {
     }
 
     async authenticate(username: string, password: string) {
+        let args = await this.runPreMiddleware(
+            'authenticate', { username, password });
+        username = args.username;
+        password = args.password;
+
         const user = await this.repo
             .findOne({ [this.usernameField]: username });
 
@@ -35,7 +40,10 @@ export class AuthService extends Service {
         if (isMatch)
             throw new Error('Unauthorised');
 
-        return user;
+        args = await this.runPostMiddleware(
+            'authenticate', { ...args, user });
+
+        return args.user;
     }
 
 }
