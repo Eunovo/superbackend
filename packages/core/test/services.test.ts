@@ -68,8 +68,13 @@ describe("CRUD test", () => {
             .rejects.toHaveProperty('message', 'Not Found');
     });
 
-    test("it should detect illegal foreign values", async () => {
+    test("it should handle foreign values", async () => {
         let username = 'username';
+
+        services.User.post('create', async (args: any) => {
+            const { id } = args;
+            await services.Test.create({ user: id });
+        });
 
         await services.User.create({ username });
         await services.Store.create({ owner: username });

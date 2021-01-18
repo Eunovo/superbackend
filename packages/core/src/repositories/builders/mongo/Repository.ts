@@ -9,7 +9,7 @@ export class MongoRepository implements Repository {
         await this.model.init();
         const model = new this.model(data);
         await model.save();
-        return model._id;
+        return model._id.toString();
     }
 
     async findOne(filter: any) {
@@ -20,10 +20,14 @@ export class MongoRepository implements Repository {
     }
 
     async findMany(filter: any, options?: any) {
-        return this.model.find(filter)
+        const results = await this.model.find(filter)
             .skip(options?.skip)
             .limit(options?.limit)
             .exec();
+        return results.map((result) => {
+            if (result?._doc) return result._doc;
+            return result;
+        })
     }
 
     async updateOne(filter: any, update: any) {

@@ -3,10 +3,6 @@
 """
 type User {
     """
-    @id
-    """
-    _id: ID!
-    """
     @unique
     """
     username: String!
@@ -24,9 +20,19 @@ enum Role {
 """
 @model
 """
+type Test {
+    """
+    @OneToOne('User', '_id')
+    """
+    user: User!
+}
+
+"""
+@model
+"""
 type Store {
     """
-    @OneToOne('User', 'username')
+    @ManyToOne('User', 'username')
     """
     owner: String!
 }
