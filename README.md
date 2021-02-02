@@ -54,4 +54,4 @@ export { repos, services };
 ### Creating your own Plugin
 
 ## License
-Licensed under the Apache license
+Licensed under the MIT license
