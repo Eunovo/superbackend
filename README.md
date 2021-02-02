@@ -1,6 +1,6 @@
 # SuperBackend
 
-Create your database and service layer from GraphQL types!
+Create your database and service layer from GraphQL types!  
 This project is still in alpha.
 
 ## Install
@@ -45,7 +45,7 @@ const { repos, services } = buildServices(schemaPath, buildMongoRepo, [
 export { repos, services };
 ```
 
-## (https://github.com/Eunovo/athena/blob/main/packages/core/README.md)[Core]
+## [Core](https://github.com/Eunovo/athena/blob/main/packages/core/README.md)
 
 ## License
 Licensed under the MIT license
