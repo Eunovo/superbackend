@@ -45,7 +45,14 @@ const { repos, services } = buildServices(schemaPath, buildMongoRepo, [
 export { repos, services };
 ```
 
-## (https://github.com/Eunovo/athena/blob/main/packages/core/README.md)[Core]
+## Plugins
+
+[CRUDPlugin](https://github.com/Eunovo/athena/blob/main/packages/core/src/plugins/crud/README.md)  
+[RelationshipPlugin](https://github.com/Eunovo/athena/blob/main/packages/core/src/plugins/relationships/README.md)  
+[UsernamePasswordAuthPlugin](https://github.com/Eunovo/athena/blob/main/packages/core/src/plugins/authentication/README.md#usernamepasswordauth)  
+[AuthorizationPlugin](https://github.com/Eunovo/athena/blob/main/packages/core/src/plugins/authorization/README.md)  
+
+### Creating your own Plugin
 
 ## License
 Licensed under the MIT license
