@@ -1,6 +1,7 @@
 # SuperBackend
 
 Create your database and service layer from GraphQL types!
+This project is still in alpha.
 
 ## Install
 
