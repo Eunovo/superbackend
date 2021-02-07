@@ -1,9 +1,11 @@
 """
 @model
+@principal
 """
 type User {
     """
     @unique
+    @allowOnMatch('user', 'create', 'read')
     """
     username: String!
     """

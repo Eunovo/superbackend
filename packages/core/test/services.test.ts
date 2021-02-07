@@ -14,11 +14,11 @@ const DB_URL = "mongodb://localhost:27017/AthenaServicesTest";
 
 const { services }: any = buildServices(
     schemaPath, buildMongoRepo, [
-        new CRUDPlugin(),
-        new RelationshipPlugin(),
-        new UsernamePasswordAuthPlugin(),
-        new AuthorizationPlugin()
-    ]
+    new CRUDPlugin(),
+    new RelationshipPlugin(),
+    new UsernamePasswordAuthPlugin(),
+    new AuthorizationPlugin()
+]
 );
 
 test("it should create CRUD services for models defined in the gql schema", () => {
@@ -52,7 +52,7 @@ describe("CRUD test", () => {
         const _id = await services.User.create({ username });
         let result = await services.User.findOne({ _id });
         expect(result.username).toBe(username);
-    
+
         const oldUsername = username;
         username = 'updated'
         await services.User.updateOne({ username }, { username: oldUsername });
@@ -66,6 +66,18 @@ describe("CRUD test", () => {
         await services.User.removeOne({ username });
         expect(services.User.findOne({ username }))
             .rejects.toHaveProperty('message', 'Not Found');
+    });
+
+    test("it should force authorised queries", async () => {
+        let username = 'authorised';
+
+        const _id = await services.User.create({ username });
+        await services.User.create({ username: 'unauthorised' });
+        let result = await services.User
+            .findMany({}, {}, { principal: { username, role: 'user' } });
+
+        expect(result.length).toEqual(1);
+        expect(result[0].username).toEqual(username);
     });
 
     test("it should handle foreign values", async () => {

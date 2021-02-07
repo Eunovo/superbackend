@@ -95,8 +95,14 @@ export class AuthorizationPlugin extends Plugin {
         // Allow all access for BASE_ROLE by default
         allowAll(BASE_ROLE, ['create', 'read', 'update', 'delete']);
 
+        let isPrincipal = false;
+
         model.metadata
-            .filter((metadata) => metadata.name === 'allow')
+            .filter((metadata) => {
+                if (metadata.name === 'principal')
+                    isPrincipal = true;
+                return (metadata.name === 'allow');
+            })
             .forEach((metadata) => {
                 const role = metadata.args[0]?.toLowerCase();
                 const operations = metadata.args.slice(1);
@@ -117,7 +123,8 @@ export class AuthorizationPlugin extends Plugin {
                         ops.forEach((operation) => builder.fixed(operation, field, value));
                     } else if (metadata.name === 'allowonmatch') {
                         const ops = args.slice(1);
-                        ops.forEach((operation) => builder.variable(operation, field));
+                        ops.forEach((operation) => builder
+                            .variable(operation, field, isPrincipal));
                     }
 
                     accessControllers.set(role, builder);

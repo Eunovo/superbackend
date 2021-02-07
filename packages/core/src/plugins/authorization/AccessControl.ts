@@ -31,13 +31,17 @@ export class AccessControllerBuilder {
         ]);
     }
 
-    variable(operation: string, field: Field) {
+    variable(operation: string, field: Field, matchAgainstSelf: boolean = false) {
         const limiter = {
             field: field.name,
             value: (principal: any) => {
+                if (matchAgainstSelf)
+                    return principal[field.name];
+
                 if (!field.foreignKey) {
                     throw new Error(
-                        `${field.name} must have a foreign key to the principal`);
+                        `${field.name} must be part of principal or must` +
+                        ` have a foreign key to the principal`);
                 }
                 // TODO check that foreign model is principal
 
@@ -58,8 +62,8 @@ export class AccessControllerBuilder {
                 if (this.all.get(operation)) {
                     return {
                         ...args,
-                        filter: {  },
-                        input: { }
+                        filter: {},
+                        input: {}
                     }
                 }
 
