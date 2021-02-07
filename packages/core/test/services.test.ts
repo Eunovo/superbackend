@@ -68,16 +68,26 @@ describe("CRUD test", () => {
             .rejects.toHaveProperty('message', 'Not Found');
     });
 
-    test("it should force authorised queries", async () => {
+    test.only("it should force authorised queries", async () => {
         let username = 'authorised';
 
-        const _id = await services.User.create({ username });
-        await services.User.create({ username: 'unauthorised' });
+        await services.User.create({ username });
+        const otherId = await services.User.create({ username: 'unauthorised' });
         let result = await services.User
-            .findMany({}, {}, { principal: { username, role: 'user' } });
+            .findMany(
+                {}, {},
+                { principal: { username, role: 'user' } }
+            );
 
         expect(result.length).toEqual(1);
         expect(result[0].username).toEqual(username);
+
+        result = await services.User
+            .findMany(
+                { _id: otherId }, {},
+                { principal: { username, role: 'user' } }
+            );
+        expect(result.length).toEqual(0);
     });
 
     test("it should handle foreign values", async () => {
