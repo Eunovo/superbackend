@@ -12,10 +12,14 @@ interface FilterItem {
 export class AccessControllerBuilder {
 
     private filters: Map<string, FilterItem[]> = new Map();
-    private all: Map<string, boolean> = new Map();
+    private all: Map<string, string> = new Map();
 
     allowAll(operation: string) {
-        this.all.set(operation, true);
+        this.all.set(operation, "ALLOW");
+    }
+
+    disallowAll(operation: string) {
+        this.all.set(operation, "DISALLOW");
     }
 
     fixed(operation: string, field: Field, value: any) {
@@ -29,6 +33,7 @@ export class AccessControllerBuilder {
             ...this.filters.get(operation) || [],
             limiter
         ]);
+        this.all.set(operation, "");
     }
 
     variable(operation: string, field: Field, matchAgainstSelf: boolean = false) {
@@ -54,18 +59,26 @@ export class AccessControllerBuilder {
             ...this.filters.get(operation) || [],
             limiter
         ]);
+        this.all.set(operation, "");
     }
 
     build(operation: string): AccessController {
         return {
             limitAccess: (principal: any, args: any) => {
-                if (this.all.get(operation)) {
+                if (this.all.get(operation) === "ALLOW") {
                     return {
                         ...args,
                         filter: {},
                         input: {}
                     }
                 }
+
+                if (this.all.get(operation) === "DISALLOW") {
+                    return { ...args, filter: undefined, input: undefined };
+                }
+
+                if (!this.filters.get(operation) || this.filters.get(operation)?.length === 0)
+                    return args;
 
                 let modifiedArgs = {};
 

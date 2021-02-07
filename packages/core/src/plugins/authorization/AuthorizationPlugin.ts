@@ -13,7 +13,7 @@ const BASE_ROLE = "*";
  * that restrict the access of principals based
  * on their roles. A principal is a logged in user.
  * Access is defined using the
- * `allow`, `allowOn` and `allowOnMatch` annotationss
+ * `allow`, `disallow`, `allowOn` and `allowOnMatch` annotationss
  */
 export class AuthorizationPlugin extends Plugin {
 
@@ -91,6 +91,14 @@ export class AuthorizationPlugin extends Plugin {
 
             accessControllers.set(role, builder);
         }
+        const disallowAll = (role: string, operations: string[]) => {
+            const builder = accessControllers.get(role) || new AccessControllerBuilder();
+            operations.forEach((operation) => {
+                builder.disallowAll(operation);
+            });
+
+            accessControllers.set(role, builder);
+        }
 
         // Allow all access for BASE_ROLE by default
         allowAll(BASE_ROLE, ['create', 'read', 'update', 'delete']);
@@ -101,17 +109,21 @@ export class AuthorizationPlugin extends Plugin {
             .filter((metadata) => {
                 if (metadata.name === 'principal')
                     isPrincipal = true;
-                return (metadata.name === 'allow');
+                return (metadata.name.includes('allow'));
             })
             .forEach((metadata) => {
                 const role = metadata.args[0]?.toLowerCase();
                 const operations = metadata.args.slice(1);
-                allowAll(role, operations);
+
+                if (metadata.name === 'allow')
+                    allowAll(role, operations);
+                else if (metadata.name === 'disallow')
+                    disallowAll(role, operations);
             });
 
         Object.values(model.fields).forEach((field) => {
             field.metadata
-                .filter((metadata) => metadata.name.startsWith('allow'))
+                .filter((metadata) => metadata.name.includes('allow'))
                 .forEach((metadata) => {
                     const args = metadata.args;
                     const role = args[0]?.toLowerCase();
