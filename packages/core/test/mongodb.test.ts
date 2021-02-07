@@ -105,7 +105,7 @@ describe("Test MongoDB repo builder", () => {
 
         const username = "Novo";
         await repo.create({ username, role: 'USER' });
-        expect(repo.create({ username, role: 'INVALID' })).rejects.toThrow();
+        await expect(repo.create({ username, role: 'INVALID' })).rejects.toThrow();
     });
 
     test("it should handle mongoose errors", async () => {

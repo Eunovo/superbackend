@@ -66,11 +66,12 @@ function getSchemaType(type: GraphQLType): any {
         return [getSchemaType(getNamedType(type))];
     }
 
+    if (isEnumType(type)) return SchemaTypes.String;
+
     if (isCompositeType(type)) {
         type = getNamedType(type);
 
         if (isModel(type)) return SchemaTypes.ObjectId;
-        if (isEnumType(type)) return SchemaTypes.String;
 
         return SchemaTypes.Mixed;
     }
