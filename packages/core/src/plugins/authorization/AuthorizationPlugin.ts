@@ -1,17 +1,27 @@
-import { GraphQLEnumType, GraphQLSchema, isEnumType } from "graphql";
+import { GraphQLSchema, isEnumType } from "graphql";
 import { Model } from "../../Model";
 import { Service } from "../../Service";
 import { extractMetadata, Models, Repositories, Services } from "../../utils";
 import { Plugin } from "../Plugin";
-import { CreateRule, DeleteRule, ReadRule, Rule, UpdateRule } from "./Rules";
+import { AccessControllerBuilder } from "./AccessControl";
+import { AccessMiddlewareBuilder } from "./AccessMiddleware";
 
+const BASE_ROLE = "*";
+
+/**
+ * This plugins add middleware to CRUD methods
+ * that restrict the access of principals based
+ * on their roles. A principal is a logged in user.
+ * Access is defined using the
+ * `allow`, `allowOn` and `allowOnMatch` annotationss
+ */
 export class AuthorizationPlugin extends Plugin {
 
-    private accessRules: Map<string, any>;
+    private roleExtensions: Map<string, string>;
 
     constructor() {
         super();
-        this.accessRules = new Map();
+        this.roleExtensions = new Map();
     }
 
     setup(schema: GraphQLSchema, models: Models) {
@@ -19,7 +29,16 @@ export class AuthorizationPlugin extends Plugin {
         if (!rolesType || !isEnumType(rolesType))
             throw new Error("Role must be defined for authorization to work");
 
-        this.accessRules = this.parseAccessRules(models, rolesType);
+        rolesType.getValues().forEach((role) => {
+            const roleMetadata = extractMetadata(role?.description || '');
+            roleMetadata.forEach((metadata) => {
+                if (metadata.name === 'extends') {
+                    const target = metadata.args[0];
+                    this.roleExtensions.set(
+                        role.name.toLowerCase(), target.toLowerCase());
+                }
+            });
+        });
     }
 
     transformServices(models: Models, repos: Repositories, services: Services) {
@@ -30,82 +49,82 @@ export class AuthorizationPlugin extends Plugin {
     }
 
     private applyAccessRules(model: Model, service: Service) {
-        const modelAccessRules = this.accessRules.get(model.name);
+        const accessControllers = this.parseAccessRules(model);
 
-        if (!modelAccessRules) return service;
+        if (!accessControllers) return service;
 
-        Object.keys(modelAccessRules).forEach((key) => {
-            const accessRules = modelAccessRules[key];
-            service.pre(key, accessMiddleware(accessRules));
+        const methodOpMap: any = {
+            create: 'create',
+            findOne: 'read',
+            findMany: 'read',
+            updateOne: 'update',
+            updateMany: 'update',
+            removeOne: 'delete',
+            removeMany: 'delete'
+        };
+        Object.keys(methodOpMap).forEach((key: string) => {
+            const operation = methodOpMap[key];
+            const middlewareBuilder = new AccessMiddlewareBuilder(
+                accessControllers, operation, this.roleExtensions,
+                BASE_ROLE
+            );
+            service.pre(key, middlewareBuilder.build());
         });
 
         return service;
     }
 
-    private parseAccessRules(models: Models, rolesType: GraphQLEnumType) {
-        const accessRules = new Map();
+    /**
+     * 
+     * @param model 
+     * @returns a map of roles to accessControllers
+     * for each role
+     */
+    private parseAccessRules(model: Model) {
+        const accessControllers: Map<string, AccessControllerBuilder> = new Map();
 
-        rolesType.getValues()
-            .forEach((role) => {
-                const metadata = extractMetadata(role.description || '');
-                metadata.forEach(({ name, args }) => {
-                    const [modelName, fieldName] = args;
-                    const field = models[modelName].fields[fieldName];
-                    const methodRules: any = accessRules.get(modelName) || {};
-                    const roleName = role.name.toLowerCase();
-
-                    const setRulesFor = (method: string, rule: Rule) => {
-                        methodRules[method] = {
-                            ...methodRules[method],
-                            [roleName]: [
-                                ...(methodRules[method]?.[roleName] || []),
-                                rule
-                            ]
-                        };
-                    }
-
-                    if (name === 'read') {
-                        const readRule = new ReadRule(field);
-                        setRulesFor('findMany', readRule);
-                        setRulesFor('findOne', readRule);
-                    } else if (name === 'update') {
-                        const updateRule = new UpdateRule(field);
-                        setRulesFor('updateOne', updateRule);
-                        setRulesFor('updateMany', updateRule);
-                    } else if (name === 'delete') {
-                        const deleteRule = new DeleteRule(field);
-                        setRulesFor('removeOne', deleteRule);
-                        setRulesFor('removeMany', deleteRule);
-                    } else {
-                        const createRule = new CreateRule(field);
-                        setRulesFor(name, createRule);
-                    }
-
-                    accessRules.set(modelName, methodRules);
-                });
+        const allowAll = (role: string, operations: string[]) => {
+            const builder = accessControllers.get(role) || new AccessControllerBuilder();
+            operations.forEach((operation) => {
+                builder.allowAll(operation);
             });
 
-        return accessRules;
+            accessControllers.set(role, builder);
+        }
+
+        // Allow all access for BASE_ROLE by default
+        allowAll(BASE_ROLE, ['create', 'read', 'update', 'delete']);
+
+        model.metadata
+            .filter((metadata) => metadata.name === 'allow')
+            .forEach((metadata) => {
+                const role = metadata.args[0]?.toLowerCase();
+                const operations = metadata.args.slice(1);
+                allowAll(role, operations);
+            });
+
+        Object.values(model.fields).forEach((field) => {
+            field.metadata
+                .filter((metadata) => metadata.name.startsWith('allow'))
+                .forEach((metadata) => {
+                    const args = metadata.args;
+                    const role = args[0]?.toLowerCase();
+                    const builder = accessControllers.get(role) || new AccessControllerBuilder();
+
+                    if (metadata.name === 'allowon') {
+                        const value = args[1];
+                        const ops = args.slice(2);
+                        ops.forEach((operation) => builder.fixed(operation, field, value));
+                    } else if (metadata.name === 'allowonmatch') {
+                        const ops = args.slice(1);
+                        ops.forEach((operation) => builder.variable(operation, field));
+                    }
+
+                    accessControllers.set(role, builder);
+                });
+        });
+
+        return accessControllers;
     }
 
-}
-
-function accessMiddleware(accessRules: any) {
-    return async (args: any) => {
-        const { context } = args;
-        if (!context.principal) throw new Error('Unauthorised');
-        const principal = context.principal;
-
-        if (!principal.role) throw new Error('Unauthorised');
-
-        const roleAccessRules = accessRules[principal.role.toLowerCase()];
-        const isAllowed = roleAccessRules
-            .reduce(
-                (prev: boolean, rule: Rule) =>
-                    prev && rule.check(principal, args),
-                true
-            );
-
-        if (!isAllowed) throw new Error('Unauthorised');
-    }
 }

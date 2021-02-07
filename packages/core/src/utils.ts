@@ -54,7 +54,7 @@ export function extractMetadata(description: string): Metadata[] {
             const asInt = Number.parseInt(arg);
 
             if (arg === 'true' || arg === 'false') {
-                return Boolean(arg);
+                return arg === 'true' ? true : false;
             } else if (asInt || asInt === 0) return asInt;
 
             return arg;
