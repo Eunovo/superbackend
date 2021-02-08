@@ -23,7 +23,7 @@ Access Control works by modifing filters and inputs to restrict the access of pr
 A principal is a logged in user. It contains all the neccessary fields required to determine it's authority.
 Access is granted to a Principal. The Principal model must have a `role: Role!` containing it's role.
 All CRUD methods accept a `Context` object which may the principal.
-```grapqhl
+```graphql
 """
 @model
 @principal
@@ -38,7 +38,7 @@ type User {
 
 By default, all users(including guests) are authorised to perform any action in your application.  
 We can modify the authority of roles.
-```grapqhl
+```graphql
 """
 @model
 
@@ -57,7 +57,7 @@ therefore any access control rule applied to `USER` is inherited by `ADMIN`.
 **Also note that `ADMIN` can override inherited access control rules.**
 
 To set access control rules based on field values, define rules on the fields.
-```grapqhl
+```graphql
 """
 @model
 @allow('ADMIN', 'create', 'read', 'update')
