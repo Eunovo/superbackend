@@ -16,6 +16,7 @@ enum Role {
     ADMIN
 }
 ```
+Access Control works by modifing filters and inputs to restrict the access of principals.
 
 ## Principals
 
