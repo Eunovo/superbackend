@@ -5,5 +5,7 @@
   "author": "Eunovo",
   "license": "MIT",
   "private": true,
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ]
 }
