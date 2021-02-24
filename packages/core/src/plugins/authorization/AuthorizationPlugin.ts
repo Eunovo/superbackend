@@ -11,8 +11,7 @@ import { Grants, Groups } from "./Grants";
  * that restrict the access of principals based
  * on their roles. A principal is a logged in user.
  * Access is defined using the
- * `allow`, `disallow`, `allowOn`, `disallowOn`
- * and `allowOnMatch` annotationss
+ * `allow` and `deny` annotationss
  */
 export class AuthorizationPlugin extends Plugin {
 

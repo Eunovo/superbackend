@@ -65,7 +65,7 @@ describe("Test Authorization", () => {
                 groups.reduce((prev: boolean, cur: string) => {
                     return prev || context.grants.role(context.principal.role, cur)
                         .authorize('create')
-                        .checkInputs(input, subject)
+                        .inputs(input, subject)
                 }, false);
 
             if (subject === input.owner) {
@@ -80,9 +80,9 @@ describe("Test Authorization", () => {
                 'findOne', { context, filter });
             const { username, role } = context.principal;
 
-            const safeFilter = context.grants.x(role, {
+            const safeFilter = context.grants.match(role, {
                 'user': 'owner', 'seller': 'owner'
-            }).authorize('read').transformFilter(filter, username);
+            }).authorize('read').filter(filter, username);
 
             return safeFilter;
         }

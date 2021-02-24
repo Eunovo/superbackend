@@ -18,8 +18,7 @@ const { services }: any = buildServices(
     new RelationshipPlugin(),
     new UsernamePasswordAuthPlugin(),
     new AuthorizationPlugin()
-]
-);
+]);
 
 test("it should create CRUD services for models defined in the gql schema", () => {
     expect(services.User).toBeDefined();
@@ -41,10 +40,10 @@ describe("CRUD test", () => {
             const { username, role } = args.context.principal ||
                 { username: '', role: '' };
             const { filter } = args;
-            args.filter = args.context.grants.x(
+            args.filter = args.context.grants.match(
                 role, { 'user': filter.username === username && 'owner' }
             ).authorize('read')
-                .transformFilter(filter, username);
+                .filter(filter, username);
         });
 
         services.User.pre('updateOne', (args: any) => {
@@ -52,12 +51,12 @@ describe("CRUD test", () => {
                 { username: '', role: '' };
             const { filter, input } = args;
 
-            const grants = args.context.grants.x(role, {
+            const grants = args.context.grants.match(role, {
                 'user': 'owner' // input.username === username && 'owner'
             }).authorize('update');
 
-            grants.checkInputs(input, username);
-            args.filter = grants.transformFilter(filter, username);
+            grants.inputs(input, username);
+            args.filter = grants.filter(filter, username);
         });
     });
 

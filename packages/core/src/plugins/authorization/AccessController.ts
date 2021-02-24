@@ -1,5 +1,8 @@
 import { Rules } from "./Rules";
 
+/**
+ * Applies given access rules to Access Control
+ */
 export class AccessController {
 
     constructor(
@@ -12,7 +15,7 @@ export class AccessController {
      * @returns `false` when the provided inputs
      * violates the access rules and `true` otherwise
      */
-    checkInputs(input: any, subject: string) {
+    inputs(input: any, subject: string) {
         const keys = Object.keys(input);
         for (const index in keys) {
             const key = keys[index];
@@ -40,12 +43,12 @@ export class AccessController {
     }
 
     /**
-     * Modifies a filter to make if conform to access rules.
+     * Returns a modified filter that conforms to access rules.
      * Uses `$or` and `$and` to restrict filter.
      * @param filter
      * @throws UnauthorisedError if all access is denied
      */
-    transformFilter(filter: any, subject: string) {
+    filter(filter: any, subject: string) {
         const orFilter = filter?.$or || [];
         const andFilter = filter?.$and || [];
         const iter = this.rules.fields();

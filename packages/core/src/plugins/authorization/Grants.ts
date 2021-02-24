@@ -5,6 +5,9 @@ export type Groups<T = any> = {
     [K in keyof T]: OperationGrants
 }
 
+/**
+ * Manages Access Rules for roles and groups
+ */
 export class Grants {
     private roles: Map<string, Groups>;
 
@@ -18,8 +21,15 @@ export class Grants {
         return this.roles.keys();
     }
 
-    x(role: string, groups: any) {
-        role = role?.toLowerCase() || '*';
+    /**
+     * Returns the access grants for a role and group.
+     * It selects the group that maps to the give role from `groups`.
+     * If a match is not found, the default group, 'any', '*', is applied.
+     * @param role 
+     * @param groups 
+     */
+    match(role: string = '*', groups: any = {}) {
+        role = role?.toLowerCase();
         groups = Object.keys(groups).reduce((prev, cur) => {
             return { ...prev, [cur.toLowerCase()]: groups[cur] }
         }, {});
@@ -29,6 +39,11 @@ export class Grants {
         return this.role(role, group);
     }
 
+    /**
+     * Returns the access grants for a given role and group. 
+     * @param role defaults to any, '*'
+     * @param group defaults to any, '*'
+     */
     role(role: string = "*", group: string = "*") {
         role = role.toLowerCase();
         let roleGroups = this.roles.get(role);
@@ -44,7 +59,7 @@ export class Grants {
     }
 
     /**
-     * 
+     * Attempts to find the parent of a role and apply inherited grants.
      * @param role 
      */
     private resolveInheritance(role: string) {
@@ -74,12 +89,20 @@ export class Grants {
 
 }
 
+/**
+ * Manages @type Rules for each operation.
+ */
 class OperationGrants {
 
     constructor(
         private operations: Map<string, Rules> = new Map()
     ) { }
 
+    /**
+     * Initializes an @type AccessController
+     * using the rules for this operation.
+     * @param operation 
+     */
     authorize(operation: string) {
         return new AccessController(this.operation(operation));
     }
