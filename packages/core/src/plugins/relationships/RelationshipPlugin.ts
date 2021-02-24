@@ -1,6 +1,3 @@
-import { Model } from "../../Model";
-import { Repository } from "../../repositories";
-import { Service } from "../../Service";
 import { Models, Repositories, Services } from "../../utils";
 import { Plugin } from "../Plugin";
 
@@ -23,7 +20,7 @@ export class RelationshipPlugin extends Plugin {
                             if (!foreignKey || !input[name]) return;
 
                             const foreigner = await foreignService
-                                .findOne({ [foreignKey]: input[name] });
+                                .findOne({ [foreignKey]: input[name] }, args.context);
                             args._foreign = {
                                 ...(args.foreign || {}),
                                 [name]: foreigner

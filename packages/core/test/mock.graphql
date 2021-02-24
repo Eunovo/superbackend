@@ -1,21 +1,30 @@
 """
 @model
 @principal
+@deny('*', '*', 'update', 'delete')
+@allow('admin', '*', 'read', 'update')
 """
 type User {
     """
     @unique
-    @allowOnMatch('user', 'create', 'read')
+    @allow('user', 'owner', 'update')
     """
     username: String!
     """
     @default('user')
     """
     role: Role!
+    """
+    @deny('user', '*', 'read')
+    """
+    blocked: [String]
 }
 
 enum Role {
     user
+    """
+    @extends('user')
+    """
     admin
 }
 

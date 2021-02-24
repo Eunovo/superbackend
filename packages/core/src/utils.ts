@@ -50,6 +50,7 @@ export function extractMetadata(description: string): Metadata[] {
         args = args.map((arg: string) => {
             arg = arg.trim();
             arg = arg.replace(/'|"/g, '');
+            // TODO verify structure
 
             const asInt = Number.parseInt(arg);
 

@@ -27,14 +27,37 @@ test("it should create CRUD services for models defined in the gql schema", () =
 
 describe("CRUD test", () => {
 
-    beforeAll(() => {
-        connect(DB_URL, {
+    beforeAll(async () => {
+        await connect(DB_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         }, (err) => {
             if (err) {
                 console.error(err);
             }
+        });
+
+        services.User.pre('findMany', (args: any) => {
+            const { username, role } = args.context.principal ||
+                { username: '', role: '' };
+            const { filter } = args;
+            args.filter = args.context.grants.x(
+                role, { 'user': filter.username === username && 'owner' }
+            ).authorize('read')
+                .transformFilter(filter, username);
+        });
+
+        services.User.pre('updateOne', (args: any) => {
+            const { username, role } = args.context.principal ||
+                { username: '', role: '' };
+            const { filter, input } = args;
+
+            const grants = args.context.grants.x(role, {
+                'user': 'owner' // input.username === username && 'owner'
+            }).authorize('update');
+
+            grants.checkInputs(input, username);
+            args.filter = grants.transformFilter(filter, username);
         });
     });
 
@@ -55,7 +78,11 @@ describe("CRUD test", () => {
 
         const oldUsername = username;
         username = 'updated'
-        await services.User.updateOne({ username }, { username: oldUsername });
+        await services.User.updateOne(
+            { username },
+            { username: oldUsername },
+            { principal: { username: 'bob', role: 'admin' } }
+        );
 
         result = await services.User.findOne({ username });
         expect(result.username).toBe(username);
@@ -71,25 +98,77 @@ describe("CRUD test", () => {
     test("it should force authorised queries", async () => {
         let username = 'authorised';
         const context = { principal: { username, role: 'user' } };
+        const unauthorisedContext = {
+            principal: { username: 'unauthorised', role: 'user' }
+        };
 
-        await services.User.create({ username }, context);
-        const otherId = await services.User
-            .create({ username: 'unauthorised' },
-            { principal: { username: 'unauthorised', role: 'user' } });
-        let result = await services.User
-            .findMany({}, {}, context);
+        await services.User.create({ username });
+        await services.User
+            .create({ username: 'unauthorised' });
 
-        expect(result.length).toEqual(1);
-        expect(result[0].username).toEqual(username);
+        const findMany = async (args: any) => {
+            let result = await services.User
+                .findMany(args.filter, {}, {
+                    principal: {
+                        username: args.username,
+                        role: args.role
+                    }
+                });
+            expect(result.length).toEqual(args.length);
+        }
 
-        result = await services.User
-            .findMany(
-                { _id: otherId }, {}, context
+        await findMany({
+            filter: {},
+            username,
+            role: 'user',
+            length: 2
+        });
+
+        // `unauthorised` can see `authorised`
+        // before any blocking operation
+        await findMany({
+            filter: { username },
+            username: 'unauthorised',
+            role: 'user',
+            length: 1
+        });
+
+        // a user should not be able to
+        // update another user
+        await services.User
+            .updateOne(
+                { blocked: ['unauthorised'] },
+                { username },
+                unauthorisedContext
             );
-        expect(result.length).toEqual(0);
 
-        // await expect(services.User.create({ username }))
-        //     .rejects.toThrow("Unauthorised");
+        // since the update failed
+        // the blocked list should remain unchanged
+        await findMany({
+            filter: { username },
+            username: 'unauthorised',
+            role: 'user',
+            length: 1
+        });
+
+        // a user should be able to update their
+        // blocked list
+        await services.User
+            .updateOne(
+                { blocked: ['unauthorised'] },
+                { username },
+                context
+            );
+
+        // the blocked list should be updated
+        // `unauthorised` should not be able to
+        // see `authorised`
+        await findMany({
+            filter: { username },
+            username: 'unauthorised',
+            role: 'user',
+            length: 0
+        });
     });
 
     test("it should handle foreign values", async () => {
