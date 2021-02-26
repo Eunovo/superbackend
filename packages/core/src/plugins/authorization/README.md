@@ -1,52 +1,49 @@
 # Authorization Plugin
 
-This plugin provides basic access control to your models using **Role Based authorization**.  
+This plugin provides access control to your app using **Role Based Authorization** and **Attribute Based Authorization**.  
+Roles and action attributes are used to determine user access rules. 
 We define roles in the `Role` enum.
 ```graphql
 enum Role {
-    USER
-    ADMIN
+    user
+    admin
 }
 ```
 Roles can extend other roles and inherit their authority
 ```graphql
 enum Role {
-    USER
-    """@extends('USER')"""
-    ADMIN
+    user
+    """@extends('user')"""
+    admin
 }
 ```
-Access Control works by modifing filters and inputs to restrict the access of principals.
+**Note that roles are case insensitive**
+We can also define attributes while .
 
 ## Principals
 
 A principal is a logged in user. It contains all the neccessary fields required to determine it's authority.
-Access is granted to a Principal. The Principal model must have a `role: Role!` containing it's role.
-All CRUD methods accept a `Context` object which may contain the principal.
-```graphql
-"""
-@model
-@principal
-"""
-type User {
-    username: String
-    role: Role!
-}
-```
+Access is usually granted to a Principal. All CRUD methods accept a `Context` object which may contain the principal.
+
 
 ## Defining Access Control Rules
 
-By default, all users(including guests) are authorised to perform any action in your application.  
+By default, all users(including guests) are denied access in your application.  
+
+We use the annotations
+ - `@allow(<Role>, <Group>, <any number of Operations>)` Grant access to specified role and group for the specified operations 
+ - `@deny(<Role>, <Group>, <any number of Operations>)` Deny access to specified role and group for the specified operations
+
 We can modify the authority of each role.
 ```graphql
 """
 @model
 
 don't allow anyone to create
-@disallow('*', 'create')
+@deny('*', '*', 'create')
 
-allow 'USER' to create
-@allow('USER', 'create')
+allow all 'user's to create
+@allow('user', '*', 'create')
 """
 type Test {
 
@@ -60,34 +57,58 @@ To set access control rules based on field values, define rules on the fields.
 ```graphql
 """
 @model
-@allow('ADMIN', 'create', 'read', 'update')
+@deny('*', '*', 'update', 'delete')
+@allow('admin', '*', 'read', 'update')
 """
 type Test {
     """
-    @allowOn('USER', false, 'create', 'read', 'update')
+    Grant access to a user who is an owner
+    when the subject matches author
+    for 'create' and 'update'
+    
+    @allow('user', 'owner', 'create', 'update')
     """
-    blocked: Boolean!
+    author: String;
+    """
+    Deny access to all users for 'read' when
+    subject exists in the blocked array 
+    
+    @deny('user', '*' , 'read')
+    """
+    blocked: [String]
 }
 ```
+```javascript
 
-In the code snippet above, users can only perform create, read and update operations on a `Test` when `blocked = false`.  
-`ADMIN` doesn't have this restriction even though it extends `USER` because it overrides
-these rules by allowing create, read and update operations unconditionally on the `Test` model.
+// Here, the username of the principal is the 'subject'
 
-To set access control rules based on fields that should match other fields on the Principal,
-define the relationship to the principal and the rule
-```graphql
-"""
-@model
-"""
-type Test {
-    """
-    @allowOnMatch('USER', 'create', 'read', 'update', 'delete')
-    @OneToOne('User', 'username')
-    """
-    owner: String!
-}
+services.User.pre(
+    ['create', 'updateOne', 'updateMany'],
+    (args, _method, operation) => {
+        const { username, role } = args.context.principal ||
+            { username: '', role: '' };
+        const { input } = args;
+
+        const grants = args.context.grants.match(role, {
+            'user': username === input.author && 'owner'
+        }).authorize(operation);
+        grants.inputs(input, username);
+    }
+);
+
+services.User.pre(
+    [
+        'findOne', 'findMany', 'updateOne',
+        'updateMany', 'removeOne', 'removeMany'
+    ],
+    (args, _method, operation) => {
+        const { username, role } = args.context.principal ||
+            { username: '', role: '' };
+        const { filter } = args;
+        args.filter = args.context.grants.match(
+            role, { 'user': filter.author === username && 'owner' }
+        ).authorize(operation)
+            .filter(filter, username);
+    }
+);
 ```
-Here, we define the relationship between the `User` model (the Principal) and the `Test` model.  
-We allow principals to perform CRUD operations on `Test` when `test.owner = principal.username`.
-**Make sure the `username` field is present in the principal**

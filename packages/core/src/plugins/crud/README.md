@@ -1,6 +1,4 @@
-# CRUD Plugin
-
-This plugin adds CRUD methods to your services.
+# CRUD Operations
 
 ### create
 
