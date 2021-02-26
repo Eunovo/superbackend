@@ -12,8 +12,8 @@ export class AccessController {
     /**
      * 
      * @param input 
-     * @returns `false` when the provided inputs
-     * violates the access rules and `true` otherwise
+     * @throws UnauthorisedError when the provided inputs
+     * violates the access rules
      */
     inputs(input: any, subject: string) {
         const keys = Object.keys(input);
@@ -22,13 +22,12 @@ export class AccessController {
 
             let granted = this.rules.field(key)
                 ?.authorize(input[key], subject);
-            granted = (granted === undefined) ? this.rules.field("*")
-                ?.isAllowed() : granted;
+            // granted = (granted === undefined) ? this.rules.field("*")
+            //     ?.isAllowed() : granted;
 
             if (granted !== undefined && granted === false)
-                return false;
+                throw new Error('Unauthorised');
         }
-        return true;
     }
 
     /**

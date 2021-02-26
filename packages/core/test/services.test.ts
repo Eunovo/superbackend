@@ -64,7 +64,7 @@ describe("CRUD test", () => {
                 ).authorize(operation)
                     .filter(filter, username);
             }
-        )
+        );
     });
 
     afterEach(async () => {

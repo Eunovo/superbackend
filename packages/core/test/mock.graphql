@@ -1,6 +1,6 @@
 """
 @model
-@deny('*', '*', 'update', 'delete')
+@allow('*', '*', 'read')
 @allow('admin', '*', 'read', 'update')
 """
 type User {

@@ -16,7 +16,6 @@ describe("Test Authorization", () => {
 
         """
         @model
-        @principal
         """
         type User {
             username: String!
@@ -25,9 +24,7 @@ describe("Test Authorization", () => {
 
         """
         @model
-        @deny('*', '*', 'create', 'update')
-        Enable create and read ops for Admins
-        @allow('ADMIN', '*', 'create', 'update')
+        @allow('ADMIN', '*', 'create', 'read', 'update')
         """
         type Store {
             """
@@ -59,21 +56,13 @@ describe("Test Authorization", () => {
         StoreService.create = async function (context: any, input: any) {
             await this.runPreMiddleware(
                 'create', { context, input });
-            const subject = context.principal.username;
+            const { username, role } = context.principal;
 
-            const isGranted = (groups: string[]) =>
-                groups.reduce((prev: boolean, cur: string) => {
-                    return prev || context.grants.role(context.principal.role, cur)
-                        .authorize('create')
-                        .inputs(input, subject)
-                }, false);
-
-            if (subject === input.owner) {
-                return isGranted(['owner', '*']);
-            } else {
-                return isGranted(['*']);
-            }
-        }
+            context.grants.match(role, {
+                'user': username === input.owner && 'owner'
+            }).authorize('create')
+                .inputs(input, username);
+        };
 
         StoreService.findOne = async function (context: any, filter: any) {
             await this.runPreMiddleware(
@@ -95,10 +84,9 @@ describe("Test Authorization", () => {
 
         await expect(StoreService
             .create(context, { owner: impostor }))
-            .resolves.toBe(false);
-        await expect(StoreService
-            .create(context, { owner: username }))
-            .resolves.toBe(true);
+            .rejects;
+        StoreService
+            .create(context, { owner: username });
 
         let filter = await StoreService
             .findOne(context, { owner: impostor });

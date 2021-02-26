@@ -71,10 +71,10 @@ export class AuthorizationPlugin extends Plugin {
     private parseAccessRules(model: Model) {
         const grants = new Grants(this.roleExtensions);
 
-        // Give all access by default
+        // Deny all access by default
         ['create', 'read', 'update', 'delete']
             .forEach((op) => {
-                grants.role()?.operation(op).all();
+                grants.role()?.operation(op).all(false);
             });
 
         model.metadata
