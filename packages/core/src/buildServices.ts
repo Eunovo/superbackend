@@ -1,8 +1,8 @@
 import { buildSchema } from "graphql";
 import { readFileSync } from "fs";
 import { RepoBuilder, Repository } from "./repositories";
-import { extractModelsFrom } from "./utils";
-import { Plugin } from "./plugins";
+import { extractModelsFrom, MapAll, Repositories, Services } from "./utils";
+import { CRUDService, Plugin } from "./plugins";
 import { Service } from "./Service";
 import { Model } from "./Model";
 
@@ -22,13 +22,13 @@ export function buildServices(
     const gqlSchema = buildSchema(schemaString);
     const models = extractModelsFrom(gqlSchema);
 
-    const repos = Object.values(models)
+    const repos: Repositories = Object.values(models)
         .reduce((prev: any, model: Model) => {
             const repo: Repository = buildRepo(model);
             return { ...prev, [model.name]: repo };
         }, {});
 
-    const services = Object.values(models)
+    const services: MapAll<any, CRUDService> = Object.values(models)
         .reduce((prev: any, model: Model) => {
             return { ...prev, [model.name]: new Service() };
         }, {});

@@ -1,6 +1,5 @@
 """
 @model
-@principal
 @deny('*', '*', 'update', 'delete')
 @allow('admin', '*', 'read', 'update')
 """

@@ -12,7 +12,7 @@ import {
 const schemaPath = join(__dirname, "./mock.graphql");
 const DB_URL = "mongodb://localhost:27017/AthenaServicesTest";
 
-const { services }: any = buildServices(
+const { services } = buildServices(
     schemaPath, buildMongoRepo, [
     new CRUDPlugin(),
     new RelationshipPlugin(),
@@ -36,28 +36,35 @@ describe("CRUD test", () => {
             }
         });
 
-        services.User.pre('findMany', (args: any) => {
-            const { username, role } = args.context.principal ||
-                { username: '', role: '' };
-            const { filter } = args;
-            args.filter = args.context.grants.match(
-                role, { 'user': filter.username === username && 'owner' }
-            ).authorize('read')
-                .filter(filter, username);
-        });
+        services.User.pre(
+            ['create', 'updateOne', 'updateMany'],
+            (args, _method, operation) => {
+                const { username, role } = args.context.principal ||
+                    { username: '', role: '' };
+                const { input } = args;
 
-        services.User.pre('updateOne', (args: any) => {
-            const { username, role } = args.context.principal ||
-                { username: '', role: '' };
-            const { filter, input } = args;
+                const grants = args.context.grants.match(role, {
+                    'user': username === input.username && 'owner'
+                }).authorize(operation);
+                grants.inputs(input, username);
+            }
+        );
 
-            const grants = args.context.grants.match(role, {
-                'user': 'owner' // input.username === username && 'owner'
-            }).authorize('update');
-
-            grants.inputs(input, username);
-            args.filter = grants.filter(filter, username);
-        });
+        services.User.pre(
+            [
+                'findOne', 'findMany', 'updateOne',
+                'updateMany', 'removeOne', 'removeMany'
+            ],
+            (args, _method, operation) => {
+                const { username, role } = args.context.principal ||
+                    { username: '', role: '' };
+                const { filter } = args;
+                args.filter = args.context.grants.match(
+                    role, { 'user': filter.username === username && 'owner' }
+                ).authorize(operation)
+                    .filter(filter, username);
+            }
+        )
     });
 
     afterEach(async () => {
@@ -134,12 +141,12 @@ describe("CRUD test", () => {
 
         // a user should not be able to
         // update another user
-        await services.User
+        await expect(services.User
             .updateOne(
                 { blocked: ['unauthorised'] },
                 { username },
                 unauthorisedContext
-            );
+            )).rejects.toThrow('Unauthorised');
 
         // since the update failed
         // the blocked list should remain unchanged

@@ -3,7 +3,7 @@ import { Model, Metadata } from "./Model";
 import { Repository } from "./repositories";
 import { Service } from "./Service";
 
-type MapAll<T = any, Y = any> = {
+export type MapAll<T = any, Y = any> = {
     [P in keyof T]: Y
 }
 

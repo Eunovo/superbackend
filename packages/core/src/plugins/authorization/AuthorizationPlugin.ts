@@ -1,9 +1,9 @@
 import { GraphQLSchema, isEnumType } from "graphql";
 import { Model } from "../../Model";
-import { Service } from "../../Service";
+import { CRUD_OPERATIONS, Service } from "../../Service";
 import { extractMetadata, Models, Repositories, Services } from "../../utils";
 import { Plugin } from "../Plugin";
-import { Grants, Groups } from "./Grants";
+import { Grants } from "./Grants";
 
 
 /**
@@ -54,16 +54,7 @@ export class AuthorizationPlugin extends Plugin {
 
         if (!grants) return service;
 
-        const methodOpMap: any = {
-            create: 'create',
-            findOne: 'read',
-            findMany: 'read',
-            updateOne: 'update',
-            updateMany: 'update',
-            removeOne: 'delete',
-            removeMany: 'delete'
-        };
-        Object.keys(methodOpMap).forEach((key: string) => {
+        Object.keys(CRUD_OPERATIONS).forEach((key: string) => {
             service.pre(key, (args) => {
                 args.context.grants = grants;
             })
