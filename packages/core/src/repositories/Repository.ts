@@ -4,7 +4,7 @@ export interface Repository {
 
     findOne(filter: any): Promise<any | null>;
 
-    findMany(filter: any, options?: any): Promise<any[]>;
+    findMany(filter: any, options?: FilterOptions): Promise<any[]>;
 
     updateOne(filter: any, data: any): Promise<void>;
 
@@ -14,4 +14,19 @@ export interface Repository {
 
     removeMany(filter: any): Promise<void>;
 
+}
+
+/**
+ * DB Filter Options
+ */
+export interface FilterOptions {
+    /**
+     * 
+     */
+    limit?: number;
+    
+    /**
+     * 
+     */
+    skip?: number;
 }

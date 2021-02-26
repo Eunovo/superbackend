@@ -1,4 +1,4 @@
-import { Repository } from "../../repositories";
+import { FilterOptions, Repository } from "../../repositories";
 import { Service } from "../../Service";
 
 
@@ -34,7 +34,7 @@ export class CRUDService extends Service {
         return args.result;
     }
 
-    async findMany(filter: any, options?: any, context: any = {}) {
+    async findMany(filter: any, options?: FilterOptions, context: any = {}) {
         let args = await this.runPreMiddleware(
             'findMany', { context, filter, options });
         filter = args.filter;
