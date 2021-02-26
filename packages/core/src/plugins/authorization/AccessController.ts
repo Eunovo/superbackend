@@ -1,3 +1,4 @@
+import { UnauthorisedError } from "../../errors";
 import { Rules } from "./Rules";
 
 /**
@@ -26,7 +27,7 @@ export class AccessController {
             //     ?.isAllowed() : granted;
 
             if (granted !== undefined && granted === false)
-                throw new Error('Unauthorised');
+                throw new UnauthorisedError();
         }
     }
 
@@ -56,7 +57,7 @@ export class AccessController {
         while (!next.done) {
             const clause = next.value.filter(subject);
 
-            if (!clause) throw new Error('Unauthorised');
+            if (!clause) throw new UnauthorisedError();
 
             if (next.value.isAllowed())
                 orFilter.push(clause);
