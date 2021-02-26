@@ -1,29 +1,19 @@
-import { hash, compare } from "bcrypt";
+import { compare } from "bcrypt";
 import { Repository } from "../../repositories";
-import { Service } from "../../Service";
+import { CRUDService } from "../crud";
 
-
-const SALT_ROUNDS = 10;
 
 /**
  * This class adds Username and Password
  * Authentication to the Service
  */
-export class AuthService extends Service {
+export class AuthService extends CRUDService {
 
     constructor(
         private usernameField: string,
         private passwordField: string,
-        private repo: Repository
-    ) {
-        super();
-
-        this.pre('create', async (args: any) => {
-            const password = args.input[passwordField];
-            const hashedPassword = await hash(password, SALT_ROUNDS);
-            args.input[passwordField] = hashedPassword;
-        });
-    }
+        repo: Repository
+    ) { super(repo); }
 
     async authenticate(username: string, password: string) {
         let args = await this.runPreMiddleware(

@@ -1,20 +1,12 @@
 import { Repository } from "../../repositories";
 import { Service } from "../../Service";
-import { Repositories, Services } from "../../utils";
 
-export type CRUDType = {}
 
 export class CRUDService extends Service {
-    private repo: Repository;
 
     constructor(
-        private name: string,
-        private repos: Repositories,
-        private services: Services
-    ) {
-        super();
-        this.repo = this.repos[this.name];
-    }
+        protected repo: Repository
+    ) { super() }
 
     async create(input: any, context: any = {}) {
         let args = await this.runPreMiddleware(

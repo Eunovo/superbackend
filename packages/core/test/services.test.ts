@@ -1,9 +1,8 @@
 import "jest";
 import { connect, connection } from "mongoose";
 import { join } from "path";
-import { buildServices, buildMongoRepo } from "../src";
+import { SuperBackend, buildMongoRepo } from "../src";
 import {
-    CRUDPlugin,
     UsernamePasswordAuthPlugin,
     AuthorizationPlugin,
     RelationshipPlugin
@@ -12,13 +11,14 @@ import {
 const schemaPath = join(__dirname, "./mock.graphql");
 const DB_URL = "mongodb://localhost:27017/AthenaServicesTest";
 
-const { services } = buildServices(
-    schemaPath, buildMongoRepo, [
-    new CRUDPlugin(),
-    new RelationshipPlugin(),
-    new UsernamePasswordAuthPlugin(),
-    new AuthorizationPlugin()
-]);
+const backend = new SuperBackend(buildMongoRepo);
+
+backend.plugin(new RelationshipPlugin());
+backend.plugin(new UsernamePasswordAuthPlugin());
+backend.plugin(new AuthorizationPlugin());
+
+const { services } = backend.build(schemaPath);
+
 
 test("it should create CRUD services for models defined in the gql schema", () => {
     expect(services.User).toBeDefined();
@@ -187,8 +187,8 @@ describe("CRUD test", () => {
 
         await services.User.create({ username });
         await services.Store.create({ owner: username });
-        expect(services.Store.create({ owner: 'Illegal' }))
-            .rejects.toHaveProperty('message', 'Not Found');
+        await expect(services.Store.create({ owner: 'Illegal' }))
+            .rejects.toThrow('Not Found');
     });
 
     test.todo("it should delete data matching the params in the db");

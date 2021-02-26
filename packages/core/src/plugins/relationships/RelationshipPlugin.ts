@@ -3,7 +3,7 @@ import { Plugin } from "../Plugin";
 
 export class RelationshipPlugin extends Plugin {
 
-    transformServices(models: Models, repos: Repositories, services: Services) {
+    transformServices(models: Models, _repos: Repositories, services: Services) {
         Object.values(models)
             .forEach(model => {
                 const { name, fields } = model;

@@ -1,6 +1,10 @@
 import "jest";
 import { buildSchema } from "graphql";
-import { extractModelsFrom, Service, UsernamePasswordAuthPlugin } from "../src";
+import {
+    AuthService,
+    extractModelsFrom,
+    UsernamePasswordAuthPlugin
+} from "../src";
 
 
 describe("test authentication plugin", () => {
@@ -25,32 +29,23 @@ describe("test authentication plugin", () => {
         let testUser: any;
 
         const repo: any = {
+            create: async (input: any) => {
+                testUser = input;
+                expect(input.password).not.toEqual(password);
+            },
             findOne: async () => {
                 return testUser;
             }
         };
 
-        const create = async function (this: Service, input: any) {
-            const args = await this.runPreMiddleware(
-                'create', { input });
-            testUser = args.input;
-            expect(testUser.password).not.toEqual(password);
-        }
-
-        let service: Service = new Service();
-        Object.defineProperty(service, 'create', {
-            value: create,
-            writable: true,
-            configurable: true,
-            enumerable: false
-        });
+        let service = new AuthService('username', 'password', repo);
 
         const authPlugin = new UsernamePasswordAuthPlugin();
         authPlugin
             .transformServices(models, { 'User': repo }, { 'User': service });
 
-        await (<any>service).create({ username, password });
-        await (<any>service).authenticate(username, password);
+        await service.create({ username, password });
+        await service.authenticate(username, password);
 
         expect.assertions(1);
     });
