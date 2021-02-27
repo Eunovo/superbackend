@@ -1,9 +1,9 @@
 import { Model } from "mongoose";
-import { Repository } from "../..";
+import { Repository, FilterOptions } from "../..";
 
 export class MongoRepository implements Repository {
 
-    constructor(private model: Model<any>) {}
+    constructor(private model: Model<any>) { }
 
     async create(data: any) {
         await this.model.init();
@@ -19,11 +19,15 @@ export class MongoRepository implements Repository {
         return result;
     }
 
-    async findMany(filter: any, options?: any) {
-        const results = await this.model.find(filter)
-            .skip(options?.skip)
-            .limit(options?.limit)
-            .exec();
+    async findMany(filter: any, options?: FilterOptions) {
+        const query = this.model.find(filter);
+
+        ['limit', 'skip'].forEach((key) => {
+            const option = options?.[<keyof FilterOptions>key];
+            if (option) (<any>query)[<any>key](option);
+        });
+
+        const results = await query.exec();
         return results.map((result) => {
             if (result?._doc) return result._doc;
             return result;

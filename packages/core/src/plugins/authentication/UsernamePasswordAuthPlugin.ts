@@ -1,29 +1,33 @@
-import { extendService, Plugin } from "../Plugin";
-import { AuthService } from "./UsernamePasswordAuthService";
-import { Repository } from "../../repositories";
-import { Service } from "../../Service";
+import { hash } from 'bcrypt';
+import { Plugin } from "../Plugin";
 import { Field, Model } from "../../Model";
 import { Models, Repositories, Services } from "../../utils";
 
+const SALT_ROUNDS = 10;
 
 export class UsernamePasswordAuthPlugin extends Plugin {
 
-    transformServices(models: Models, repos: Repositories, services: Services) {
+    transformServices(models: Models, _repos: Repositories, services: Services) {
         Object.keys(models)
             .forEach((name) => {
-                services[name] = this.getAuthService(
-                    models[name], repos[name], services[name])
+                const isAuthEnabled = models[name].metadata
+                    .find(({ name }) => name === 'usernamepasswordauth');
+                if (!isAuthEnabled) return;
+
+                const passwordField = this.parse(models[name]);
+
+                services[name].pre('create', async (args: any) => {
+                    const password = args.input[passwordField.name];
+                    const hashedPassword = await hash(password, SALT_ROUNDS);
+                    args.input[passwordField.name] = hashedPassword;
+                });
             });
     }
 
-    private getAuthService(model: Model, repo: Repository, service: Service) {
-        const isAuthEnabled = model.metadata
-            .find(({ name }) => name === 'usernamepasswordauth');
-        if (!isAuthEnabled)
-            return service;
-
+    private parse(model: Model) {
         let usernameField: Field | undefined;
         let passwordField: Field | undefined;
+
         Object.values(model.fields)
             .forEach((field) => {
                 let usernameCheck = field.metadata
@@ -41,11 +45,7 @@ export class UsernamePasswordAuthPlugin extends Plugin {
         if (!passwordField) {
             throw new Error("password is not set");
         }
-
-        const authService = new AuthService(usernameField.name, passwordField.name, repo);
-        extendService(service, authService);
-
-        return service;
+        return passwordField;
     }
 
 }

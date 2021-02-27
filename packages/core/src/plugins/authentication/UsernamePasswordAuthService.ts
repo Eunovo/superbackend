@@ -1,29 +1,20 @@
-import { hash, compare } from "bcrypt";
+import { compare } from "bcrypt";
+import { UnauthorisedError } from "../../errors";
 import { Repository } from "../../repositories";
-import { Service } from "../../Service";
+import { CRUDService } from "../crud";
 
-
-const SALT_ROUNDS = 10;
 
 /**
  * This class adds Username and Password
  * Authentication to the Service
  */
-export class AuthService extends Service {
+export class AuthService extends CRUDService {
 
     constructor(
         private usernameField: string,
         private passwordField: string,
-        private repo: Repository
-    ) {
-        super();
-
-        this.pre('create', async (args: any) => {
-            const password = args.input[passwordField];
-            const hashedPassword = await hash(password, SALT_ROUNDS);
-            args.input[passwordField] = hashedPassword;
-        });
-    }
+        repo: Repository
+    ) { super(repo); }
 
     async authenticate(username: string, password: string) {
         let args = await this.runPreMiddleware(
@@ -34,11 +25,11 @@ export class AuthService extends Service {
         const user = await this.repo
             .findOne({ [this.usernameField]: username });
 
-        if (!user) throw new Error('Unauthorised');
+        if (!user) throw new UnauthorisedError();
 
         const isMatch = await compare(user[this.passwordField], password);
         if (isMatch)
-            throw new Error('Unauthorised');
+            throw new UnauthorisedError();
 
         args = await this.runPostMiddleware(
             'authenticate', { ...args, user });

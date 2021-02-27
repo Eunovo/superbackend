@@ -3,7 +3,7 @@ import { Model, Metadata } from "./Model";
 import { Repository } from "./repositories";
 import { Service } from "./Service";
 
-type MapAll<T = any, Y = any> = {
+export type MapAll<T = any, Y = any> = {
     [P in keyof T]: Y
 }
 
@@ -50,6 +50,7 @@ export function extractMetadata(description: string): Metadata[] {
         args = args.map((arg: string) => {
             arg = arg.trim();
             arg = arg.replace(/'|"/g, '');
+            // TODO verify structure
 
             const asInt = Number.parseInt(arg);
 
