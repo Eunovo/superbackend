@@ -17,8 +17,9 @@ backend.plugin(new RelationshipPlugin());
 backend.plugin(new UsernamePasswordAuthPlugin());
 backend.plugin(new AuthorizationPlugin());
 
-const { services } = backend.build(schemaPath);
+const { services, controllers } = backend.build(schemaPath);
 
+const USER_ROUTE = '/users';
 
 test("it should create CRUD services for models defined in the gql schema", () => {
     expect(services.User).toBeDefined();
@@ -189,6 +190,26 @@ describe("CRUD test", () => {
         await services.Store.create({ owner: username });
         await expect(services.Store.create({ owner: 'Illegal' }))
             .rejects.toThrow('Not Found');
+    });
+
+    test("it should handle rest request appropriately", async () => {
+        expect(controllers.User.route).toEqual(USER_ROUTE);
+        const postHandler = controllers.User.getHandler(`${USER_ROUTE}/`, 'post');
+        const getHandler = controllers.User.getHandler(`${USER_ROUTE}/`, 'get');
+        
+        if (!postHandler || !getHandler) fail('Handler is not defined');
+
+        const username = 'ctrller_test';
+        await postHandler({
+            body: { username }
+        });
+
+        const response = await getHandler({
+            query: {},
+            user: { username, role: 'user' }
+        });
+
+        expect(response.data.results[0]?.username).toEqual(username);
     });
 
     test.todo("it should delete data matching the params in the db");
