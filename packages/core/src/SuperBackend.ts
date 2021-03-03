@@ -60,6 +60,11 @@ export class SuperBackend {
                 const restMetadata = model.metadata.find(
                     (metadata) => metadata.name === 'rest');
                 route = restMetadata?.args[0];
+                const methods = restMetadata?.args.slice(1)
+                    .reduce(
+                        (prev: any, cur: string) => ({ ...prev, [cur]: true }),
+                        {}
+                    );
 
                 if (!route) return prev;
 
