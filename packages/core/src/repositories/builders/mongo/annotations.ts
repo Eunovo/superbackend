@@ -9,7 +9,7 @@ export const MONGO_ANNOTATIONS: { [P in DB_ANNOTATIONS] : (metadata: Metadata) =
 };
 
 function verifyMetadata({ name, args }: Metadata, length: number) {
-    if (args.length !== length) {
+    if (args.length < length) {
         throw new Error(`${name} expected at least ${length} arguments but got ${args.length}`);
     }
 
