@@ -1,5 +1,5 @@
 import { MapAll, Models, Repositories } from "../../utils";
-import { CRUDService } from "../crud";
+import { CRUDService } from "../../crud";
 import { Plugin } from "../Plugin";
 
 export class RelationshipPlugin extends Plugin {

@@ -1,19 +1,7 @@
-import { MapAll } from "./utils";
-
-export type CRUD = 'create' | 'read' | 'update' | 'delete';
 export type Middleware = (
-    args: any, method: string, operation: CRUD
+    args: any, method: string, operation: any
 ) => Promise<void> | void;
-export const CRUD_OPERATIONS: MapAll<any, CRUD> =
-{
-    create: 'create',
-    findOne: 'read',
-    findMany: 'read',
-    updateOne: 'update',
-    updateMany: 'update',
-    removeOne: 'delete',
-    removeMany: 'delete'
-};
+
 
 export type Listener = (event: string, data?: any) => void;
 
@@ -53,10 +41,10 @@ export class Service {
         }
     }
 
-    private async runMiddleware(middleware: Middleware[], args: any, method: string) {
+    protected async runMiddleware(middleware: Middleware[], args: any, method: string) {
         let i = 0;
         while (i < middleware.length) {
-            await middleware[i](args, method, CRUD_OPERATIONS[method]);
+            await middleware[i](args, method, method);
             i++;
         }
         return args;

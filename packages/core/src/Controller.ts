@@ -1,4 +1,4 @@
-import { CRUDService } from "./plugins/crud";
+import { CRUDService } from "./crud";
 import { CRUD } from "./Service";
 
 /**

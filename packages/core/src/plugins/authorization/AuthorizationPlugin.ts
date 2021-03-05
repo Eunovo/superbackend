@@ -1,7 +1,7 @@
 import { GraphQLSchema, isEnumType } from "graphql";
 import { Model } from "../../Model";
-import { CRUD_OPERATIONS, Service } from "../../Service";
-import { extractMetadata, Models, Repositories, Services } from "../../utils";
+import { CRUD_OPERATIONS, CRUDService } from "../../crud";
+import { extractMetadata, MapAll, Models, Repositories } from "../../utils";
 import { Plugin } from "../Plugin";
 import { Grants } from "./Grants";
 
@@ -42,14 +42,14 @@ export class AuthorizationPlugin extends Plugin {
         });
     }
 
-    transformServices(models: Models, repos: Repositories, services: Services) {
+    transformServices(models: Models, repos: Repositories, services: MapAll<any, CRUDService>) {
         Object.values(models)
             .forEach((model) => {
                 this.applyAccessRules(model, services[model.name]);
             });
     }
 
-    private applyAccessRules(model: Model, service: Service) {
+    private applyAccessRules(model: Model, service: CRUDService) {
         const grants = this.parseAccessRules(model);
 
         if (!grants) return service;

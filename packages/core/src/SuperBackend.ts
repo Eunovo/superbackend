@@ -2,7 +2,8 @@ import { buildSchema } from "graphql";
 import { readFileSync } from "fs";
 import { RepoBuilder, Repository } from "./repositories";
 import { extractModelsFrom, MapAll, Models, Repositories, Services } from "./utils";
-import { CRUDService, Plugin } from "./plugins";
+import { CRUDService } from "./crud";
+import { Plugin } from "./plugins";
 import { Model } from "./Model";
 import { CRUDController } from "./Controller";
 

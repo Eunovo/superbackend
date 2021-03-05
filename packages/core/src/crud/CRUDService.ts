@@ -1,5 +1,6 @@
-import { FilterOptions, Repository } from "../../repositories";
-import { Service } from "../../Service";
+import { FilterOptions, Repository } from "../repositories";
+import { Service } from "../Service";
+import { CRUD_OPERATIONS, CRUDMiddleware } from "./CRUDOps";
 
 
 export class CRUDService extends Service {
@@ -87,4 +88,20 @@ export class CRUDService extends Service {
             'removeMany', args);
     }
 
+    protected async runMiddleware(middleware: CRUDMiddleware[], args: any, method: string) {
+        let i = 0;
+        while (i < middleware.length) {
+            await middleware[i](args, method, CRUD_OPERATIONS[method]);
+            i++;
+        }
+        return args;
+    }
+
+    pre(methods: string | string[], middleware: CRUDMiddleware) {
+        super.pre(methods, middleware);
+    }
+
+    post(methods: string | string[], middleware: CRUDMiddleware) {
+        super.post(methods, middleware);
+    }
 }
