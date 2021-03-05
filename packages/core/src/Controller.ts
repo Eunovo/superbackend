@@ -1,5 +1,4 @@
-import { CRUDService } from "./crud";
-import { CRUD } from "./Service";
+import { CRUDService, CRUD } from "./crud";
 
 /**
  * Selects which CRUD operations to expose
