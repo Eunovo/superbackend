@@ -62,8 +62,10 @@ export class SuperBackend {
                 route = restMetadata?.args[0];
                 const methods = restMetadata?.args.slice(1)
                     .reduce(
-                        (prev: any, cur: string) => ({ ...prev, [cur]: true }),
-                        {}
+                        (prev: any, cur: string) => ({
+                            ...(prev || {}), [cur]: true
+                        }),
+                        undefined
                     );
 
                 if (!route) return prev;
@@ -71,7 +73,7 @@ export class SuperBackend {
                 return {
                     ...prev,
                     [model.name]: new CRUDController(
-                        route, this.services[model.name])
+                        route, this.services[model.name], methods)
                 };
             }, {});
 
