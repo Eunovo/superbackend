@@ -1,4 +1,6 @@
 import { GraphQLNamedType, GraphQLObjectType, GraphQLSchema } from "graphql";
+import { generateTypeScriptTypes, GenerateTypescriptOptions } from "graphql-schema-typescript"
+import { join } from "path"
 import { Model, Metadata } from "./Model";
 import { Repository } from "./repositories";
 import { Service } from "./Service";
@@ -85,4 +87,17 @@ export function isModel(type: GraphQLNamedType) {
 export function getMetadata(description: string, metadataName: string) {
     const metadata = extractMetadata(description);
     return metadata.find((value) => value.name === metadataName);
+}
+
+export async function generateSchema(schemaPath: string) {
+    const outputPath = join(process.cwd(), "SBTypes.d.ts");
+    const apiOptions: GenerateTypescriptOptions = {
+        typePrefix: "SB"
+    }
+    try {
+        const schema = await generateTypeScriptTypes(schemaPath, outputPath, apiOptions)
+        return true
+    } catch (error) {
+        throw new Error("Failed to generate types from schema")
+    }
 }

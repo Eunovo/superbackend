@@ -105,7 +105,7 @@ export class SuperBackend {
      */
     service(name: string, service: CRUDService) {
         this.services[name] = service;
-        
+
         this.isBuilt && this.applyPlugins(
             { [name]: this.models[name] },
             { [name]: this.repos[name] },
