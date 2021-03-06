@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "bcrypt": "^5.0.0",
-    "graphql": "^15.4.0"
+    "chokidar": "^3.5.1",
+    "graphql": "^15.4.0",
+    "graphql-schema-typescript": "^1.5.2"
   }
 }

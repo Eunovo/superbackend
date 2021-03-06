@@ -7,8 +7,5 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ],
-  "dependencies": {
-    "graphql-schema-typescript": "^1.5.2"
-  }
+  ]
 }
