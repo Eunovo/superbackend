@@ -1,34 +1,50 @@
-import { MapAll } from "./utils";
-
-export type CRUD = 'create' | 'read' | 'update' | 'delete';
 export type Middleware = (
-    args: any, method: string, operation: CRUD
+    args: any, method: string, operation: any
 ) => Promise<void> | void;
-export const CRUD_OPERATIONS: MapAll<any, CRUD> =
-{
-    create: 'create',
-    findOne: 'read',
-    findMany: 'read',
-    updateOne: 'update',
-    updateMany: 'update',
-    removeOne: 'delete',
-    removeMany: 'delete'
-};
+
+
+export type Listener = (event: string, data?: any) => void;
 
 
 export class Service {
+    private listeners: Map<string, Listener[]>;
     private preMiddleware: Map<string, Middleware[]>;
     private postMiddleware: Map<string, Middleware[]>;
 
     constructor() {
+        this.listeners = new Map();
         this.preMiddleware = new Map();
         this.postMiddleware = new Map();
     }
 
-    private async runMiddleware(middleware: Middleware[], args: any, method: string) {
+    protected fire(event: string, data?: any) {
+        const listeners = this.listeners.get(event) || [];
+        listeners.forEach((listener) => {
+            listener(event, data);
+        });
+    }
+
+    /**
+     * Adds the given listener for the given event
+     * @param event 
+     * @param listener
+     * @returns an unuscribe function to remove the listener 
+     */
+    listen(event: string, listener: Listener) {
+        const existingListeners = this.listeners.get(event) || [];
+        this.listeners.set(event, [...existingListeners, listener]);
+
+        return () => {
+            let listeners = this.listeners.get(event) || [];
+            listeners = listeners.filter((item) => item !== listener);
+            this.listeners.set(event, listeners);
+        }
+    }
+
+    protected async runMiddleware(middleware: Middleware[], args: any, method: string) {
         let i = 0;
         while (i < middleware.length) {
-            await middleware[i](args, method, CRUD_OPERATIONS[method]);
+            await middleware[i](args, method, method);
             i++;
         }
         return args;

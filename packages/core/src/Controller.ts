@@ -1,19 +1,29 @@
-import { CRUDService } from "./plugins/crud";
+import { CRUDService, CRUD } from "./crud";
+
+/**
+ * Selects which CRUD operations to expose
+ */
+type Methods = { [P in CRUD]?: boolean };
+
+const DEFAULT_METHODS: Methods = {
+    create: true, read: true, update: true, delete: true
+}
 
 export class CRUDController {
     private handlers: Map<string, Handler>;
 
     constructor(
         public readonly route: string,
-        protected service: CRUDService
+        protected service: CRUDService,
+        protected methods: Methods = DEFAULT_METHODS
     ) {
         this.handlers = new Map();
         
-        this.get('/', this.getMany.bind(this));
-        this.post('/', this.create.bind(this));
-        this.put('/', this.updateMany.bind(this));
-        this.patch('/', this.updateMany.bind(this));
-        this.delete('/', this.removeMany.bind(this));
+        this.methods.read && this.get('/', this.getMany.bind(this));
+        this.methods.create && this.post('/', this.create.bind(this));
+        this.methods.update && this.put('/', this.updateMany.bind(this));
+        this.methods.update && this.patch('/', this.updateMany.bind(this));
+        this.methods.delete && this.delete('/', this.removeMany.bind(this));
     }
 
     async create(req: any) {

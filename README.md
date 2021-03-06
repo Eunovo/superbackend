@@ -28,21 +28,19 @@ Instantiate your backend services and repositories
 import {
     AuthorizationPlugin,
     buildMongoRepo,
-    buildServices,
-    CRUDPlugin,
+    SuperBackend,
     RelationshipPlugin,
     UsernamePasswordAuthPlugin
 } from '@eunovo/superbackend';
 
 const schemaPath = `<YOUR_GRAPHQL_FILE>`;
-const { repos, services } = buildServices(schemaPath, buildMongoRepo, [
-    new CRUDPlugin(),
-    new RelationshipPlugin(),
-    new UsernamePasswordAuthPlugin(),
-    new AuthorizationPlugin()
-]);
+const backend = new SuperBackend(buildMongoRepo);
 
-export { repos, services };
+backend.plugin(new RelationshipPlugin());
+backend.plugin(new UsernamePasswordAuthPlugin());
+backend.plugin(new AuthorizationPlugin());
+
+const { models, repos, services } = backend.build(schemaPath);
 ```
 
 ## [Core](https://github.com/Eunovo/athena/blob/main/packages/core/README.md)

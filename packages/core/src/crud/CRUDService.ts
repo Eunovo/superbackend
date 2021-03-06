@@ -1,5 +1,7 @@
-import { FilterOptions, Repository } from "../../repositories";
-import { Service } from "../../Service";
+import { FilterOptions, Repository } from "../repositories";
+import { Service } from "../Service";
+import { CRUD_OPERATIONS, CRUDMiddleware } from "./CRUDOps";
+import { Filter } from "./Filter";
 
 
 export class CRUDService extends Service {
@@ -20,7 +22,7 @@ export class CRUDService extends Service {
         return args.id;
     }
 
-    async findOne(filter: any, context: any = {}) {
+    async findOne(filter: Filter, context: any = {}) {
         let args = await this.runPreMiddleware(
             'findOne', { context, filter });
         filter = args.filter;
@@ -34,7 +36,7 @@ export class CRUDService extends Service {
         return args.result;
     }
 
-    async findMany(filter: any, options?: FilterOptions, context: any = {}) {
+    async findMany(filter: Filter, options?: FilterOptions, context: any = {}) {
         let args = await this.runPreMiddleware(
             'findMany', { context, filter, options });
         filter = args.filter;
@@ -47,7 +49,7 @@ export class CRUDService extends Service {
         return args.results;
     }
 
-    async updateOne(input: any, filter: any, context: any = {}) {
+    async updateOne(input: any, filter: Filter, context: any = {}) {
         let args = await this.runPreMiddleware(
             'updateOne', { context, input, filter });
         filter = args.filter;
@@ -57,7 +59,7 @@ export class CRUDService extends Service {
         await this.runPostMiddleware('updateOne', args);
     }
 
-    async updateMany(input: any, filter: any, context: any = {}) {
+    async updateMany(input: any, filter: Filter, context: any = {}) {
         let args = await this.runPreMiddleware(
             'updateMany', { context, input, filter });
         filter = args.filter;
@@ -67,7 +69,7 @@ export class CRUDService extends Service {
         await this.runPostMiddleware('updateMany', args);
     }
 
-    async removeOne(filter: any, context: any = {}) {
+    async removeOne(filter: Filter, context: any = {}) {
         let args = await this.runPreMiddleware(
             'removeOne', { context, filter });
         filter = args.filter;
@@ -77,7 +79,7 @@ export class CRUDService extends Service {
             'removeOne', args);
     }
 
-    async removeMany(filter: any, context: any = {}) {
+    async removeMany(filter: Filter, context: any = {}) {
         let args = await this.runPreMiddleware(
             'removeMany', { context, filter });
         filter = args.filter;
@@ -87,4 +89,20 @@ export class CRUDService extends Service {
             'removeMany', args);
     }
 
+    protected async runMiddleware(middleware: CRUDMiddleware[], args: any, method: string) {
+        let i = 0;
+        while (i < middleware.length) {
+            await middleware[i](args, method, CRUD_OPERATIONS[method]);
+            i++;
+        }
+        return args;
+    }
+
+    pre(methods: string | string[], middleware: CRUDMiddleware) {
+        super.pre(methods, middleware);
+    }
+
+    post(methods: string | string[], middleware: CRUDMiddleware) {
+        super.post(methods, middleware);
+    }
 }

@@ -10,8 +10,9 @@ import {
     isNonNullType
 } from "graphql";
 import { Schema, SchemaTypes } from "mongoose";
-import { Field, Model } from "../../../Model";
+import { Field, Metadata, Model } from "../../../Model";
 import { isModel } from "../../../utils";
+import { MONGO_ANNOTATIONS } from "./annotations";
 
 /**
  * Build the mongoose schema for
@@ -50,11 +51,14 @@ function getDefinition(field: Field) {
         definition.ref = (<GraphQLNamedType>type).name;
     }
 
-    field.metadata.forEach(({ name, args }) => {
-        definition[name] = args[0];
-    });
-
-    return definition;
+    return field.metadata
+        .filter((value) => (<any>MONGO_ANNOTATIONS)[value.name])
+        .reduce(
+            (prev: any, cur: Metadata) => ({
+                ...prev, ...(<any>MONGO_ANNOTATIONS)[cur.name](cur)
+            }),
+            definition
+        );
 }
 
 

@@ -43,9 +43,12 @@ backend.plugin(new AuthorizationPlugin());
 const { models, repos, services } = backend.build(schemaPath);
 ```
 
-## Plugins
+## CRUD
 
-[CRUDPlugin](https://github.com/Eunovo/athena/blob/main/packages/core/src/plugins/crud/README.md)  
+[CRUD](https://github.com/Eunovo/athena/blob/main/packages/core/src/crud/README.md) 
+
+## Plugins
+ 
 [RelationshipPlugin](https://github.com/Eunovo/athena/blob/main/packages/core/src/plugins/relationships/README.md)  
 [UsernamePasswordAuthPlugin](https://github.com/Eunovo/athena/blob/main/packages/core/src/plugins/authentication/README.md#usernamepasswordauth)  
 [AuthorizationPlugin](https://github.com/Eunovo/athena/blob/main/packages/core/src/plugins/authorization/README.md)  

@@ -1,7 +1,7 @@
 import { compare } from "bcrypt";
 import { UnauthorisedError } from "../../errors";
 import { Repository } from "../../repositories";
-import { CRUDService } from "../crud";
+import { CRUDService } from "../../crud";
 
 
 /**

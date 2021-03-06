@@ -2,7 +2,8 @@ import { buildSchema } from "graphql";
 import { readFileSync } from "fs";
 import { RepoBuilder, Repository } from "./repositories";
 import { extractModelsFrom, MapAll, Models, Repositories, Services } from "./utils";
-import { CRUDService, Plugin } from "./plugins";
+import { CRUDService } from "./crud";
+import { Plugin } from "./plugins";
 import { Model } from "./Model";
 import { CRUDController } from "./Controller";
 
@@ -60,13 +61,20 @@ export class SuperBackend {
                 const restMetadata = model.metadata.find(
                     (metadata) => metadata.name === 'rest');
                 route = restMetadata?.args[0];
+                const methods = restMetadata?.args.slice(1)
+                    .reduce(
+                        (prev: any, cur: string) => ({
+                            ...(prev || {}), [cur]: true
+                        }),
+                        undefined
+                    );
 
                 if (!route) return prev;
 
                 return {
                     ...prev,
                     [model.name]: new CRUDController(
-                        route, this.services[model.name])
+                        route, this.services[model.name], methods)
                 };
             }, {});
 

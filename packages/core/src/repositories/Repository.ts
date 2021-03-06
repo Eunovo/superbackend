@@ -30,3 +30,5 @@ export interface FilterOptions {
      */
     skip?: number;
 }
+
+export type DB_ANNOTATIONS = "default" | "unique" | "immutable" | "index";

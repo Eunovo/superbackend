@@ -84,7 +84,7 @@ describe("CRUD test", () => {
         expect(result.username).toBe(username);
 
         const oldUsername = username;
-        username = 'updated'
+        username = 'updated';
         await services.User.updateOne(
             { username },
             { username: oldUsername },
