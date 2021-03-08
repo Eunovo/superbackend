@@ -18,7 +18,7 @@ export class CRUDController {
         protected methods: Methods = DEFAULT_METHODS
     ) {
         this.handlers = new Map();
-        
+
         this.methods.read && this.get('/', this.getMany.bind(this));
         this.methods.create && this.post('/', this.create.bind(this));
         this.methods.update && this.put('/', this.updateMany.bind(this));
@@ -59,36 +59,25 @@ export class CRUDController {
 
     async updateMany(req: any) {
         const { _limit, _skip, ...filter } = req.query;
-
-        const data = {
-            results: await this.service.updateMany(
-                req.body,
-                filter,
-                {
-                    principal: req.user
-                }
-            )
-        };
+        await this.service.updateMany(
+            req.body, filter,
+            { principal: req.user }
+        );
 
         return {
-            message: 'success', data
+            message: 'success'
         };
     }
 
     async removeMany(req: any) {
         const { _limit, _skip, ...filter } = req.query;
-
-        const data = {
-            results: await this.service.removeMany(
-                filter,
-                {
-                    principal: req.user
-                }
-            )
-        };
+        await this.service.removeMany(
+            filter,
+            { principal: req.user }
+        );
 
         return {
-            message: 'success', data
+            message: 'success'
         };
     }
 
