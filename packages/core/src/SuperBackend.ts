@@ -1,7 +1,7 @@
 import { buildSchema } from "graphql";
 import { readFileSync } from "fs";
 import { RepoBuilder, Repository } from "./repositories";
-import { extractModelsFrom, MapAll, Models, Repositories, Services } from "./utils";
+import { extractModelsFrom, MapAll, Models, Repositories, Services, generateSchema } from "./utils";
 import { CRUDService } from "./crud";
 import { Plugin } from "./plugins";
 import { Model } from "./Model";
@@ -32,7 +32,7 @@ export class SuperBackend {
         const schemaString = readFileSync(path).toString();
         const gqlSchema = buildSchema(schemaString);
         this.models = extractModelsFrom(gqlSchema);
-
+        generateSchema(schemaString);
         this.plugins.forEach((plugin) => {
             plugin.setup(gqlSchema, this.models);
         });

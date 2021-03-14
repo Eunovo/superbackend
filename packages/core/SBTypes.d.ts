@@ -12,11 +12,7 @@ import { GraphQLResolveInfo } from 'graphql';
  *          TYPE DEFS          *
  *                             *
  *******************************/
-export interface SBQuery {
-  _empty?: string;
-}
-
-export interface SBMutation {
+export interface Query {
   _empty?: string;
 }
 
@@ -26,7 +22,7 @@ export interface SBMutation {
  * @allow('*', '*', 'read')
  * @allow('admin', '*', 'read', 'update')
  */
-export interface SBUser {
+export interface User {
   
   /**
    * @unique
@@ -37,7 +33,7 @@ export interface SBUser {
   /**
    * @default('user')
    */
-  role: SBRole;
+  role: Role;
   
   /**
    * @deny('user', '*', 'read')
@@ -45,7 +41,7 @@ export interface SBUser {
   blocked?: Array<string | null>;
 }
 
-export const enum SBRole {
+export const enum Role {
   user = 'user',
   
   /**
@@ -58,19 +54,19 @@ export const enum SBRole {
  * @model
  * @rest('/tests')
  */
-export interface SBTest {
+export interface Test {
   
   /**
    * @OneToOne('User', '_id')
    */
-  user: SBUser;
+  user: User;
 }
 
 /**
  * @model
  * @rest('/stores)
  */
-export interface SBStore {
+export interface Store {
   
   /**
    * @ManyToOne('User', 'username')
@@ -88,14 +84,13 @@ export interface SBStore {
  * Note that this type is designed to be compatible with graphql-tools resolvers
  * However, you can still use other generated interfaces to make your resolver type-safed
  */
-export interface SBResolver {
-  Query?: SBQueryTypeResolver;
-  Mutation?: SBMutationTypeResolver;
-  User?: SBUserTypeResolver;
-  Test?: SBTestTypeResolver;
-  Store?: SBStoreTypeResolver;
+export interface Resolver {
+  Query?: QueryTypeResolver;
+  User?: UserTypeResolver;
+  Test?: TestTypeResolver;
+  Store?: StoreTypeResolver;
 }
-export interface SBQueryTypeResolver<TParent = any> {
+export interface QueryTypeResolver<TParent = any> {
   _empty?: QueryTo_emptyResolver<TParent>;
 }
 
@@ -103,15 +98,7 @@ export interface QueryTo_emptyResolver<TParent = any, TResult = any> {
   (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 
-export interface SBMutationTypeResolver<TParent = any> {
-  _empty?: MutationTo_emptyResolver<TParent>;
-}
-
-export interface MutationTo_emptyResolver<TParent = any, TResult = any> {
-  (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
-}
-
-export interface SBUserTypeResolver<TParent = any> {
+export interface UserTypeResolver<TParent = any> {
   username?: UserToUsernameResolver<TParent>;
   role?: UserToRoleResolver<TParent>;
   blocked?: UserToBlockedResolver<TParent>;
@@ -129,7 +116,7 @@ export interface UserToBlockedResolver<TParent = any, TResult = any> {
   (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 
-export interface SBTestTypeResolver<TParent = any> {
+export interface TestTypeResolver<TParent = any> {
   user?: TestToUserResolver<TParent>;
 }
 
@@ -137,7 +124,7 @@ export interface TestToUserResolver<TParent = any, TResult = any> {
   (parent: TParent, args: {}, context: any, info: GraphQLResolveInfo): TResult;
 }
 
-export interface SBStoreTypeResolver<TParent = any> {
+export interface StoreTypeResolver<TParent = any> {
   owner?: StoreToOwnerResolver<TParent>;
 }
 

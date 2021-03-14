@@ -92,10 +92,11 @@ export function getMetadata(description: string, metadataName: string) {
 export async function generateSchema(schemaPath: string) {
     const outputPath = join(process.cwd(), "SBTypes.d.ts");
     const apiOptions: GenerateTypescriptOptions = {
-        typePrefix: "SB"
+        typePrefix: "",
+        optionalResolverInfo: false
     }
     try {
-        const schema = await generateTypeScriptTypes(schemaPath, outputPath, apiOptions)
+        await generateTypeScriptTypes(schemaPath, outputPath, apiOptions)
         return true
     } catch (error) {
         throw new Error("Failed to generate types from schema")
