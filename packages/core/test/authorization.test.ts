@@ -1,6 +1,6 @@
 import "jest";
 import { buildSchema } from "graphql";
-import { AuthorizationPlugin, extractModelsFrom, Service } from "../src";
+import { AuthorizationPlugin, CRUDService, extractModelsFrom } from "../src";
 
 
 describe("Test Authorization", () => {
@@ -43,8 +43,8 @@ describe("Test Authorization", () => {
         const plugin = new AuthorizationPlugin();
         plugin.setup(gqlSchema, { User, Store });
         const services = {
-            'User': new Service(),
-            'Store': new Service()
+            'User': new CRUDService(repos.User),
+            'Store': new CRUDService(repos.Store)
         };
 
         plugin.transformServices({ User, Store }, repos, services);
