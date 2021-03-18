@@ -1,6 +1,5 @@
 import { compare } from "bcrypt";
 import { UnauthorisedError } from "../../errors";
-import { Repository } from "../../repositories";
 import { CRUDService } from "../../crud";
 
 
@@ -22,8 +21,8 @@ export class AuthService extends CRUDService {
 
         if (!user) throw new UnauthorisedError();
 
-        const isMatch = await compare(user[passwordField], password);
-        if (isMatch)
+        const isMatch = await compare(password, user[passwordField]);
+        if (!isMatch)
             throw new UnauthorisedError();
 
         args = await this.runPostMiddleware(

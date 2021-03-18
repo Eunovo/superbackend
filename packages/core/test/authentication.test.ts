@@ -46,7 +46,9 @@ describe("test authentication plugin", () => {
 
         await service.create({ username, password });
         await service.authenticate(username, password);
+        await expect(service.authenticate(username, 'fakepassword'))
+            .rejects.toThrow('Unauthorised');
 
-        expect.assertions(1);
+        expect.assertions(2);
     });
 });
