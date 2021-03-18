@@ -127,9 +127,9 @@ export class CRUDController {
     }
 }
 
-type HttpMethods = "post" | "get" | "put" | "patch" | "delete";
+export type HttpMethods = "post" | "get" | "put" | "patch" | "delete";
 
-type RequestHandler = ((req: any) => any) | ((req: any) => Promise<any>);
+export type RequestHandler = ((req: any) => any) | ((req: any) => Promise<any>);
 
 export type Handler = {
     post?: RequestHandler
