@@ -10,24 +10,19 @@ import { CRUDService } from "../../crud";
  */
 export class AuthService extends CRUDService {
 
-    constructor(
-        private usernameField: string,
-        private passwordField: string,
-        repo: Repository
-    ) { super(repo); }
-
     async authenticate(username: string, password: string) {
         let args = await this.runPreMiddleware(
             'authenticate', { username, password });
+        const { usernameField, passwordField } = args;
         username = args.username;
         password = args.password;
 
         const user = await this.repo
-            .findOne({ [this.usernameField]: username });
+            .findOne({ [usernameField]: username });
 
         if (!user) throw new UnauthorisedError();
 
-        const isMatch = await compare(user[this.passwordField], password);
+        const isMatch = await compare(user[passwordField], password);
         if (isMatch)
             throw new UnauthorisedError();
 
