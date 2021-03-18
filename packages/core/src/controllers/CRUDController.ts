@@ -1,4 +1,5 @@
-import { CRUDService, CRUD } from "./crud";
+import { CRUDService, CRUD } from "../crud";
+import { BaseController } from "./BaseController";
 
 /**
  * Selects which CRUD operations to expose
@@ -9,15 +10,13 @@ const DEFAULT_METHODS: Methods = {
     create: true, read: true, update: true, delete: true
 }
 
-export class CRUDController {
-    private handlers: Map<string, Handler>;
-
+export class CRUDController extends BaseController {
     constructor(
         public readonly route: string,
         protected service: CRUDService,
         protected methods: Methods = DEFAULT_METHODS
     ) {
-        this.handlers = new Map();
+        super(route);
 
         this.methods.read && this.get('/', this.getMany.bind(this));
         this.methods.create && this.post('/', this.create.bind(this));
@@ -80,61 +79,4 @@ export class CRUDController {
             message: 'success'
         };
     }
-
-    /**
-     * @returns a map of routes to @type Handler
-     */
-    getHandlers() {
-        return this.handlers;
-    }
-
-    /**
-     * Tries to retrieve the request handler of the given
-     * route and method.
-     * @param route 
-     * @param method
-     * @returns `RequestHandler | undefined` 
-     */
-    getHandler(route: string, method: HttpMethods) {
-        return this.handlers.get(route)?.[method];
-    }
-
-    post(route: string, handler: RequestHandler) {
-        this.on('post', route, handler);
-    }
-
-    get(route: string, handler: RequestHandler) {
-        this.on('get', route, handler);
-    }
-
-    put(route: string, handler: RequestHandler) {
-        this.on('put', route, handler);
-    }
-
-    patch(route: string, handler: RequestHandler) {
-        this.on('patch', route, handler);
-    }
-
-    delete(route: string, handler: RequestHandler) {
-        this.on('delete', route, handler);
-    }
-
-    private on(method: HttpMethods, route: string, requestHandler: RequestHandler) {
-        route = `${this.route}${route}`;
-        const handler = this.handlers.get(route) || {};
-        handler[method] = requestHandler;
-        this.handlers.set(route, handler);
-    }
-}
-
-export type HttpMethods = "post" | "get" | "put" | "patch" | "delete";
-
-export type RequestHandler = ((req: any) => any) | ((req: any) => Promise<any>);
-
-export type Handler = {
-    post?: RequestHandler
-    get?: RequestHandler
-    put?: RequestHandler
-    patch?: RequestHandler
-    delete?: RequestHandler
 }

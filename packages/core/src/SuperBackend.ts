@@ -5,7 +5,7 @@ import { extractModelsFrom, MapAll, Models, Repositories, Services } from "./uti
 import { CRUDService } from "./crud";
 import { Plugin } from "./plugins";
 import { Model } from "./Model";
-import { CRUDController } from "./Controller";
+import { CRUDController } from "./controllers/CRUDController";
 
 
 export class SuperBackend {
