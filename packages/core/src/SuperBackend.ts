@@ -89,6 +89,16 @@ export class SuperBackend {
         };
     }
 
+    getAll() {
+        // TODO Export a copy of internal objects
+        return {
+            controllers: this.controllers,
+            repos: this.repos,
+            models: this.models,
+            services: this.services,
+        }
+    }
+
     /**
      * 
      * @param name the model name
