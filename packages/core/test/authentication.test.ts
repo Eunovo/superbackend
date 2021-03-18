@@ -38,7 +38,7 @@ describe("test authentication plugin", () => {
             }
         };
 
-        let service = new AuthService('username', 'password', repo);
+        let service = new AuthService(repo);
 
         const authPlugin = new UsernamePasswordAuthPlugin();
         authPlugin
