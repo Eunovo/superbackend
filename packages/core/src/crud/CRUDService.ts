@@ -18,7 +18,8 @@ export class CRUDService extends Service {
         const id = await this.repo.create(input);
         args = await this.runPostMiddleware(
             'create', { ...args, id });
-        
+
+        this.fire('create', { id, ...args });
         return args.id;
     }
 
@@ -33,6 +34,7 @@ export class CRUDService extends Service {
         args = await this.runPostMiddleware(
             'findOne', { ...args, result });
 
+        this.fire('read', args);
         return args.result;
     }
 
@@ -46,6 +48,7 @@ export class CRUDService extends Service {
         args = await this.runPostMiddleware(
             'findMany', { ...args, results });
 
+        this.fire('read', args);
         return args.results;
     }
 
@@ -57,6 +60,8 @@ export class CRUDService extends Service {
         
         await this.repo.updateOne(filter, input);
         await this.runPostMiddleware('updateOne', args);
+
+        this.fire('update', args);
     }
 
     async updateMany(input: any, filter: Filter, context: any = {}) {
@@ -67,6 +72,7 @@ export class CRUDService extends Service {
         
         await this.repo.updateMany(filter, input);
         await this.runPostMiddleware('updateMany', args);
+        this.fire('update', args);
     }
 
     async removeOne(filter: Filter, context: any = {}) {
@@ -77,6 +83,7 @@ export class CRUDService extends Service {
         await this.repo.removeOne(filter);
         await this.runPostMiddleware(
             'removeOne', args);
+        this.fire('remove', args);
     }
 
     async removeMany(filter: Filter, context: any = {}) {
@@ -87,6 +94,7 @@ export class CRUDService extends Service {
         await this.repo.removeMany(filter);
         await this.runPostMiddleware(
             'removeMany', args);
+        this.fire('remove', args);
     }
 
     protected async runMiddleware(middleware: CRUDMiddleware[], args: any, method: string) {
