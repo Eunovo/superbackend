@@ -14,8 +14,8 @@ export class MongoRepository implements Repository {
 
     async findOne(filter: any) {
         const result = await this.model.findOne(filter)
+            .lean()
             .exec();
-        if (result?._doc) return result._doc;
         return result;
     }
 
@@ -27,11 +27,8 @@ export class MongoRepository implements Repository {
             if (option) (<any>query)[<any>key](option);
         });
 
-        const results = await query.exec();
-        return results.map((result) => {
-            if (result?._doc) return result._doc;
-            return result;
-        })
+        const results = await query.lean().exec();
+        return results;
     }
 
     async updateOne(filter: any, update: any) {
