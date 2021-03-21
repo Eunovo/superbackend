@@ -6,13 +6,13 @@ import { handleMongooseError } from "./error-handler";
 import { buildSchema } from "./schema";
 
 export const buildMongoRepo: RepoBuilder = (modelObj: Model) => {
-    const mongooseSchema = buildMongoSchem(modelObj);
+    const mongooseSchema = buildMongoSchema(modelObj);
     const mongooseModel = model(modelObj.name, mongooseSchema);
 
     return new MongoRepository(mongooseModel);
 }
 
-export const buildMongoSchem = (model: Model) => {
+export const buildMongoSchema = (model: Model) => {
     const mongooseSchema = buildSchema(model);
 
     mongooseSchema.post('save', handleMongooseError);
