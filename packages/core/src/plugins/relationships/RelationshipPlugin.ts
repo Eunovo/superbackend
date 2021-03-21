@@ -4,7 +4,7 @@ import { Plugin } from "../Plugin";
 
 export class RelationshipPlugin extends Plugin {
 
-    transformServices(models: Models, _repos: Repositories, services: MapAll<any, CRUDService>) {
+    transformServices(models: Models, _repos: Repositories, services: MapAll<any, CRUDService | undefined>) {
         Object.values(models)
             .forEach(model => {
                 const { name, fields } = model;
@@ -34,7 +34,7 @@ export class RelationshipPlugin extends Plugin {
                             }
                         };
 
-                        service.pre(
+                        service?.pre(
                             ['create', 'updateOne', 'updateMany'],
                             fetchForeigners
                         );

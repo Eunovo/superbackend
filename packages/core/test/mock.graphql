@@ -49,3 +49,10 @@ type Store {
     """
     owner: String!
 }
+
+"""
+@model(false)
+"""
+type ModelOnly {
+    test: String
+}

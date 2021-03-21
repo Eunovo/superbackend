@@ -16,13 +16,13 @@ export class UsernamePasswordAuthPlugin extends Plugin {
 
                 const [usernameField, passwordField] = this.parse(models[name]);
 
-                services[name].pre('create', async (args: any) => {
+                services[name]?.pre('create', async (args: any) => {
                     const password = args.input[passwordField.name];
                     const hashedPassword = await hash(password, SALT_ROUNDS);
                     args.input[passwordField.name] = hashedPassword;
                 });
 
-                services[name].pre('authenticate', (args: any) => {
+                services[name]?.pre('authenticate', (args: any) => {
                     args.usernameField = usernameField.name;
                     args.passwordField = passwordField.name;
                 });

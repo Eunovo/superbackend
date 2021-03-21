@@ -17,12 +17,14 @@ backend.plugin(new RelationshipPlugin());
 backend.plugin(new UsernamePasswordAuthPlugin());
 backend.plugin(new AuthorizationPlugin());
 
-const { services, controllers } = backend.build(schemaPath);
+const { models, services, controllers } = backend.build(schemaPath);
 
 const USER_ROUTE = '/users';
 
 test("it should create CRUD services for models defined in the gql schema", () => {
     expect(services.User).toBeDefined();
+    expect(models.ModelOnly).toBeDefined();
+    expect(services.ModelOnly).not.toBeDefined();
 });
 
 describe("CRUD test", () => {

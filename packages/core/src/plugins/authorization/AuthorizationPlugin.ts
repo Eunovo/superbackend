@@ -42,10 +42,12 @@ export class AuthorizationPlugin extends Plugin {
         });
     }
 
-    transformServices(models: Models, repos: Repositories, services: MapAll<any, CRUDService>) {
+    transformServices(models: Models, repos: Repositories, services: MapAll<any, CRUDService | undefined>) {
         Object.values(models)
             .forEach((model) => {
-                this.applyAccessRules(model, services[model.name]);
+                const service = services[model.name];
+                if (!service) return;
+                this.applyAccessRules(model, service);
             });
     }
 

@@ -12,7 +12,7 @@ export class SuperBackend {
     private plugins: Plugin[];
     private models: Models;
     private repos: Repositories;
-    private services: MapAll<any, CRUDService>;
+    private services: MapAll<any, CRUDService | undefined>;
     private controllers: MapAll<any, CRUDController>;
     private isBuilt: boolean = false;
 
@@ -37,7 +37,17 @@ export class SuperBackend {
             plugin.setup(gqlSchema, this.models);
         });
 
+        const allowsCrud = (model: Model) => {
+            const meta = model.metadata
+                .find((meta) =>
+                    meta.name === 'model' &&
+                    (meta.args.length === 0 || meta.args[0])
+                );
+            return meta ? true : false;
+        }
+
         this.repos = Object.values(this.models)
+            .filter((model) => allowsCrud(model))
             .reduce((prev: any, model: Model) => {
                 const repo: Repository = this.buildRepo(model);
                 if (this.repos[model.name]) return prev;
@@ -47,11 +57,13 @@ export class SuperBackend {
 
         this.services = Object.values(this.models)
             .reduce((prev: any, model: Model) => {
-                if (this.services[model.name]) return prev;
+                const repo = this.repos[model.name];
+                if (this.services[model.name] || !repo)
+                    return prev;
 
                 return {
                     ...prev,
-                    [model.name]: new CRUDService(this.repos[model.name])
+                    [model.name]: new CRUDService(repo)
                 };
             }, {});
 
@@ -68,13 +80,14 @@ export class SuperBackend {
                         }),
                         undefined
                     );
+                const service = this.services[model.name];
 
-                if (!route) return prev;
+                if (!route || !service) return prev;
 
                 return {
                     ...prev,
                     [model.name]: new CRUDController(
-                        route, this.services[model.name], methods)
+                        route, service, methods)
                 };
             }, {});
 
@@ -115,7 +128,7 @@ export class SuperBackend {
      */
     service(name: string, service: CRUDService) {
         this.services[name] = service;
-        
+
         this.isBuilt && this.applyPlugins(
             { [name]: this.models[name] },
             { [name]: this.repos[name] },

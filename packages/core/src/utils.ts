@@ -8,8 +8,8 @@ export type MapAll<T = any, Y = any> = {
 }
 
 export type Models<T = any> = MapAll<T, Model>;
-export type Repositories<T = any> = MapAll<T, Repository>;
-export type Services<T = any> = MapAll<T, Service>;
+export type Repositories<T = any> = MapAll<T, Repository | undefined>;
+export type Services<T = any> = MapAll<T, Service | undefined>;
 
 export function extractModelsFrom(gqlSchema: GraphQLSchema): Models {
     const typeMap = gqlSchema.getTypeMap();
