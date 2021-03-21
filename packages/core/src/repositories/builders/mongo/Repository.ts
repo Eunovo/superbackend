@@ -3,7 +3,7 @@ import { Repository, FilterOptions } from "../..";
 
 export class MongoRepository implements Repository {
 
-    constructor(private model: Model<any>) { }
+    constructor(protected model: Model<any>) { }
 
     async create(data: any) {
         await this.model.init();
