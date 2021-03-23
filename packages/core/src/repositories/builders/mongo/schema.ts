@@ -42,12 +42,14 @@ function getDefinition(field: Field) {
 
     definition.type = getSchemaType(type);
 
-    if (isEnumType(getNamedType(type))) {
+    type = getNamedType(type);
+
+    if (isEnumType(type)) {
         definition.enum = (<GraphQLEnumType>type)
             .getValues().map((value) => value.name);
     }
 
-    if (isModel(getNamedType(type))) {
+    if (isModel(type)) {
         definition.ref = (<GraphQLNamedType>type).name;
     }
 

@@ -48,6 +48,13 @@ type Store {
     @ManyToOne('User', 'username')
     """
     owner: String!
+    test: [Status]
+}
+
+enum Status {
+    rock
+    paper
+    scissors
 }
 
 """
