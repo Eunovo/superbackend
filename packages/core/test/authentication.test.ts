@@ -8,7 +8,7 @@ import {
 
 
 describe("test authentication plugin", () => {
-    test("it should hash password on create and provide an 'authenticate' method ", async () => {
+    test("it should hash password on create and update and provide an 'authenticate' method ", async () => {
         const gqlSchemaString = `
         """
         @model
@@ -35,6 +35,10 @@ describe("test authentication plugin", () => {
             },
             findOne: async () => {
                 return testUser;
+            },
+            updateOne: async (_: any, input: any) => {
+                testUser = input;
+                expect(input.password).not.toEqual('somethingelse');
             }
         };
 
@@ -49,6 +53,11 @@ describe("test authentication plugin", () => {
         await expect(service.authenticate(username, 'fakepassword'))
             .rejects.toThrow('Unauthorised');
 
-        expect.assertions(2);
+        await service.updateOne({ password: 'somethingelse' }, { username });
+        await service.authenticate(username, 'somethingelse');
+        await expect(service.authenticate(username, password))
+            .rejects.toThrow('Unauthorised');
+
+        expect.assertions(4);
     });
 });
