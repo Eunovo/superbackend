@@ -82,7 +82,7 @@ type Test {
 
 // Here, the username of the principal is the 'subject'
 
-services.User.pre(
+services.User?.pre(
     ['create', 'updateOne', 'updateMany'],
     (args, _method, operation) => {
         const { username, role } = args.context.principal ||
@@ -96,7 +96,7 @@ services.User.pre(
     }
 );
 
-services.User.pre(
+services.User?.pre(
     [
         'findOne', 'findMany', 'updateOne',
         'updateMany', 'removeOne', 'removeMany'
