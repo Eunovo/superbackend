@@ -26,7 +26,7 @@ export class CRUDController extends BaseController {
     }
 
     async create(req: any) {
-        await this.service.create(
+        const _id = await this.service.create(
             req.body,
             {
                 principal: req.user
@@ -34,7 +34,8 @@ export class CRUDController extends BaseController {
         );
 
         return {
-            message: 'success'
+            message: 'success',
+            data: { _id }
         };
     }
 
