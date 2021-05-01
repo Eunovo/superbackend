@@ -12,7 +12,7 @@ export class Grants {
     private roles: Map<string, Groups>;
 
     constructor(
-        private roleExtensions: Map<string, string>
+        private roleExtensions: Map<string, string[]>
     ) {
         this.roles = new Map();
     }
@@ -63,11 +63,15 @@ export class Grants {
      * @param role 
      */
     private resolveInheritance(role: string) {
-        const parent = this.roleExtensions.get(role);
-        if (!parent || parent === role) return;
+        const parents = this.roleExtensions.get(role);
+        if (parents?.length === 0) return;
 
-        this.resolveInheritance(parent);
-        this.inheritGrants(role, parent);
+        parents
+            ?.filter((parent) => parent !== role)
+            .forEach(parent => {
+                this.resolveInheritance(parent);
+                this.inheritGrants(role, parent);
+            });
     }
 
 

@@ -15,7 +15,7 @@ import { Grants } from "./Grants";
  */
 export class AuthorizationPlugin extends Plugin {
 
-    private roleExtensions: Map<string, string>;
+    private roleExtensions: Map<string, string[]>;
 
     constructor() {
         super();
@@ -30,13 +30,15 @@ export class AuthorizationPlugin extends Plugin {
         rolesType.getValues().forEach((role) => {
             const roleMetadata = extractMetadata(role?.description || '');
             // extend the base role by default
-            this.roleExtensions.set(role.name.toLowerCase(), '*');
+            this.roleExtensions.set(role.name.toLowerCase(), ['*']);
 
             roleMetadata.forEach((metadata) => {
                 if (metadata.name === 'extends') {
                     const target = metadata.args[0];
+                    const name = role.name.toLowerCase();
+                    const parents = this.roleExtensions.get(name) || [];
                     this.roleExtensions.set(
-                        role.name.toLowerCase(), target.toLowerCase());
+                        name, [...parents, target.toLowerCase()]);
                 }
             });
         });
