@@ -38,7 +38,7 @@ export class AuthorizationPlugin extends Plugin {
                     const name = role.name.toLowerCase();
                     const parents = this.roleExtensions.get(name) || [];
                     this.roleExtensions.set(
-                        name, [...parents, target.toLowerCase()]);
+                        name, [target.toLowerCase(), ...parents]);
                 }
             });
         });

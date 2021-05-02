@@ -127,7 +127,7 @@ describe("CRUD test", () => {
         await findMany({
             filter: {},
             username,
-            role: 'user',
+            role: 'admin',
             length: 2
         });
 
@@ -204,7 +204,7 @@ describe("CRUD test", () => {
 
         const response = await getHandler({
             query: {},
-            user: { username, role: 'user' }
+            user: { username, role: 'admin' }
         });
 
         expect(response.data.results[0]?.username).toEqual(username);

@@ -62,16 +62,19 @@ export class Grants {
      * Attempts to find the parent of a role and apply inherited grants.
      * @param role 
      */
-    private resolveInheritance(role: string) {
+    private resolveInheritance(role: string, inherited: string[] = []) {
         const parents = this.roleExtensions.get(role);
-        if (parents?.length === 0) return;
+        if (parents?.length === 0) return [...inherited, role];
 
         parents
-            ?.filter((parent) => parent !== role)
-            .forEach(parent => {
-                this.resolveInheritance(parent);
+            ?.forEach(parent => {
+                if (inherited.includes(parent)) return;
+
+                inherited = this.resolveInheritance(parent, inherited);
                 this.inheritGrants(role, parent);
             });
+
+        return [...inherited, role];
     }
 
 
