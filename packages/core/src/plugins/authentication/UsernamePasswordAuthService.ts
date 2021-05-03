@@ -19,7 +19,7 @@ export class AuthService extends CRUDService {
         const user = await this.repo
             .findOne({ [usernameField]: username });
 
-        if (!user) throw new UnauthorisedError();
+        if (!user || !password || !user[passwordField]) throw new UnauthorisedError();
 
         const isMatch = await compare(password, user[passwordField]);
         if (!isMatch)
