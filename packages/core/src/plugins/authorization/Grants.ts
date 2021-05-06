@@ -55,7 +55,21 @@ export class Grants {
         this.roles.set(role, roleGroups);
         this.resolveInheritance(role);
 
-        return this.roles.get(role)?.[group];
+        const authRole = this.roles.get(role);
+
+        if (!authRole) return undefined;
+
+        const baseGroup = authRole['*'];
+        let authGroup = authRole[group];
+
+        // TODO fix mutability of grants object problem
+
+        if (Boolean(authGroup) && Boolean(baseGroup))
+            authGroup = authGroup.extend(baseGroup);
+
+
+        this.roles.set(role, { ...authRole, [group]: authGroup });
+        return authGroup;
     }
 
     /**

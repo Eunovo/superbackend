@@ -43,7 +43,7 @@ describe("CRUD test", () => {
             ['create', 'updateOne', 'updateMany'],
             (args, _method, operation) => {
                 const { username, role } = args.context.principal ||
-                    { username: '', role: '' };
+                    { username: undefined, role: undefined };
                 const { input } = args;
 
                 const grants = args.context.grants.match(role, {
@@ -60,7 +60,7 @@ describe("CRUD test", () => {
             ],
             (args, _method, operation) => {
                 const { username, role } = args.context.principal ||
-                    { username: '', role: '' };
+                    { username: undefined, role: undefined };
                 const { filter } = args;
                 args.filter = args.context.grants.match(
                     role, { 'user': filter.username === username && 'owner' }

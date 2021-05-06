@@ -1,8 +1,8 @@
 """
 @model
 @rest('/users')
-@allow('user', '*', 'read')
-@allow('admin', '*', 'update')
+@allow('*', '*', 'read', 'delete')
+@allow('admin', '*', 'read', 'update')
 """
 type User {
     """

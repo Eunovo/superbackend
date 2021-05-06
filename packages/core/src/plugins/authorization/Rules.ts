@@ -21,6 +21,25 @@ export class Rules {
         this.fieldsMap.set(
             name, new FieldAccessController(name, allow)
         );
+
+        if (name !== '*' && Boolean(this.fieldsMap.get('*')?.isAllowed()) !== allow) {
+            // this.fieldsMap.delete('*');
+        }
+
+        if (name === '*') {
+            const iter = this.fieldsMap.keys();
+            let next = iter.next()
+
+            while (!next.done) {
+                const key = next.value;
+                const value = Boolean(this.fieldsMap.get(key)?.isAllowed());
+                if (value !== allow && key !== name) {
+                    this.fieldsMap.delete(key);
+                }
+
+                next = iter.next();
+            }
+        }
     }
 }
 

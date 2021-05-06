@@ -49,27 +49,34 @@ export class AccessController {
      * @throws UnauthorisedError if all access is denied
      */
     filter(filter: any, subject: string) {
-        const orFilter = filter?.$or || [];
-        const andFilter = filter?.$and || [];
+        const orFilter = [];
+        const andFilter = [];
         const iter = this.rules.fields();
         let next = iter.next();
 
         while (!next.done) {
-            const clause = next.value.filter(subject);
+            const fieldAC = next.value;
+            next = iter.next();
 
-            if (!clause) throw new UnauthorisedError();
+            const clause = fieldAC.filter(subject);
+            if (!clause) continue;
 
-            if (next.value.isAllowed())
+            if (fieldAC.isAllowed())
                 orFilter.push(clause);
             else andFilter.push(clause);
-
-            next = iter.next();
         }
+        
+        if (!orFilter.length && !andFilter.length)
+            throw new UnauthorisedError();
 
         const finalFilter = { ...filter };
 
-        if (orFilter.length > 0) finalFilter.$or = orFilter;
-        if (andFilter.length > 0) finalFilter.$and = andFilter;
+        if (orFilter.length > 0)
+            finalFilter.$or = [...(filter.$or || []), ...orFilter];
+
+        if (andFilter.length > 0)
+            finalFilter.$and = [...(filter.$and || []), ...andFilter];
+
         return finalFilter;
     }
 
