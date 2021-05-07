@@ -16,11 +16,16 @@ function getValidationErrorMessage(error: Error.ValidatorError) {
 }
 
 export function handleDuplicateKeyError(error: any) {
-    const errors = Object.keys(error.keyValue)
-        .map((key) => ({
-            name: key, message: `${error.keyValue[key]} already exists`
-        }));
-    return new InputError(errors, "Validation Errors");
+    if (error.keyValue) {
+        const errors = Object.keys(error.keyValue)
+            .map((key) => ({
+                name: key, message: `${error.keyValue[key]} already exists`
+            }));
+        return new InputError(errors, "Validation Errors");
+    }
+    // We have to extract the value from the message
+    const match = error?.message?.match(/".*"/g);
+    return new InputError([], `${match[0]} already exists`);
 }
 
 export function handleValidationError(error: any) {
