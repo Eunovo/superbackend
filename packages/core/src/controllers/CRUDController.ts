@@ -29,7 +29,8 @@ export class CRUDController extends BaseController {
         const _id = await this.service.create(
             req.body,
             {
-                principal: req.user
+                principal: req.user,
+                auth: true
             }
         );
 
@@ -47,7 +48,8 @@ export class CRUDController extends BaseController {
                 filter,
                 { limit: _limit, skip: _skip },
                 {
-                    principal: req.user
+                    principal: req.user,
+                    auth: true
                 }
             )
         };
@@ -61,7 +63,10 @@ export class CRUDController extends BaseController {
         const { _limit, _skip, ...filter } = req.query;
         await this.service.updateMany(
             req.body, filter,
-            { principal: req.user }
+            {
+                principal: req.user,
+                auth: true
+            }
         );
 
         return {
@@ -73,7 +78,10 @@ export class CRUDController extends BaseController {
         const { _limit, _skip, ...filter } = req.query;
         await this.service.removeMany(
             filter,
-            { principal: req.user }
+            {
+                principal: req.user,
+                auth: true
+            }
         );
 
         return {
