@@ -6,3 +6,4 @@ export * from './controllers';
 export * from './Service';
 export * from './crud';
 export * from './plugins';
+export * from './errors';
