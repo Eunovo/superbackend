@@ -34,7 +34,7 @@ export class Grants {
             return { ...prev, [cur.toLowerCase()]: groups[cur] }
         }, {});
 
-        const group = groups[role] || '*';
+        const group = groups['*'] || groups[role] || '*';
 
         return this.role(role, group);
     }
