@@ -1,4 +1,4 @@
-import { buildSchema } from "graphql";
+import { buildSchema, GraphQLSchema } from "graphql";
 import { readFileSync } from "fs";
 import { RepoBuilder, Repository } from "./repositories";
 import { extractModelsFrom, MapAll, Models, Repositories, Services } from "./utils";
@@ -12,34 +12,35 @@ import { Observable } from "./Observable";
 export class SuperBackend {
     private observable: Observable;
     private plugins: Plugin[];
-    private models: Models;
-    private repos: Repositories;
-    private services: MapAll<any, CRUDService | undefined>;
-    private controllers: MapAll<any, CRUDController>;
-    private isBuilt: boolean = false;
 
     constructor(private buildRepo: RepoBuilder) {
         this.plugins = [];
-        this.models = { };
-        this.repos = { };
-        this.services = { };
-        this.controllers = { };
         this.observable = new Observable();
     }
 
-    /**
-     * Parses the graphql schema
-     * @param path to the scehma file
-     */
-    build(path: string) {
+    applyPlugins(models: Models, repos: Repositories, services: Services) {
+        this.plugins.forEach((plugin) => {
+            try {
+                plugin.transformServices(models, repos, services);
+            } catch (e: any) {
+                throw new Error(`Failed to apply plugins: ${e.message}`);
+            }
+        });
+    }
+
+    buildModels(path: string) {
         const schemaString = readFileSync(path).toString();
         const gqlSchema = buildSchema(schemaString);
-        this.models = extractModelsFrom(gqlSchema);
+        const models = extractModelsFrom(gqlSchema);
 
         this.plugins.forEach((plugin) => {
-            plugin.setup(gqlSchema, this.models);
+            plugin.setup(gqlSchema, models);
         });
 
+        return { models: models, schema: gqlSchema }
+    }
+
+    buildRepos(models: MapAll<any, Model>) {
         const allowsCrud = (model: Model) => {
             const meta = model.metadata
                 .find((meta) =>
@@ -49,20 +50,24 @@ export class SuperBackend {
             return meta ? true : false;
         }
 
-        this.repos = Object.values(this.models)
+        const repos = Object.values(models)
             .filter((model) => allowsCrud(model))
             .reduce((prev: any, model: Model) => {
                 const repo: Repository = this.buildRepo(model);
-                if (this.repos[model.name]) return prev;
-
                 return { ...prev, [model.name]: repo };
             }, { });
 
-        this.services = Object.values(this.models)
+        return { repos };
+    }
+
+    buildServices(
+        models: MapAll<any, Model>,
+        repos: MapAll<any, Repository | undefined>
+    ) {
+        const services = Object.values(models)
             .reduce((prev: any, model: Model) => {
-                const repo = this.repos[model.name];
-                if (this.services[model.name] || !repo)
-                    return prev;
+                const repo = repos[model.name];
+                if (!repo) return prev;
 
                 return {
                     ...prev,
@@ -73,7 +78,14 @@ export class SuperBackend {
                 };
             }, { });
 
-        this.controllers = Object.values(this.models)
+        return { services };
+    }
+
+    buildControllers(
+        models: MapAll<any, Model>,
+        services: MapAll<any, CRUDService | undefined>,
+    ) {
+        const controllers = Object.values(models)
             .reduce((prev: any, model: Model) => {
                 let route = '';
                 const restMetadata = model.metadata.find(
@@ -86,7 +98,7 @@ export class SuperBackend {
                         }),
                         undefined
                     );
-                const service = this.services[model.name];
+                const service = services[model.name];
 
                 if (!route || !service) return prev;
 
@@ -97,14 +109,23 @@ export class SuperBackend {
                 };
             }, { });
 
-        this.applyPlugins(this.models, this.repos, this.services);
-        this.isBuilt = true;
+        return { controllers };
+    }
+
+    /**
+     * Parses the graphql schema
+     * @param path to the scehma file
+     */
+    build(path: string) {
+        const { models } = this.buildModels(path);
+        const { repos } = this.buildRepos(models);
+        const { services } = this.buildServices(models, repos);
+        const { controllers } = this.buildControllers(models, services);
+
+        this.applyPlugins(models, repos, services);
 
         return {
-            models: { ...this.models },
-            repos: { ...this.repos },
-            services: { ...this.services },
-            controllers: { ...this.controllers }
+            models, repos, services, controllers
         };
     }
 
@@ -112,57 +133,8 @@ export class SuperBackend {
         return this.observable;
     }
 
-    getAll() {
-        // TODO Export a copy of internal objects
-        return {
-            controllers: this.controllers,
-            repos: this.repos,
-            models: this.models,
-            services: this.services,
-        }
-    }
-
-    /**
-     * 
-     * @param name the model name
-     * @param repo the new Repository
-     */
-    repo(name: string, repo: Repository) {
-        this.repos[name] = repo;
-    }
-
-    /**
-     * Applies all plugins to the given service
-     * @param name the model name
-     * @param service the new service
-     */
-    service(name: string, service: CRUDService) {
-        this.services[name] = service;
-
-        this.isBuilt && this.applyPlugins(
-            { [name]: this.models[name] },
-            { [name]: this.repos[name] },
-            { [name]: service }
-        );
-
-        const oldController = this.controllers[name];
-        if (oldController)
-            this.controllers[name] = new CRUDController(
-                oldController.route, service);
-    }
-
     plugin(plugin: Plugin) {
         this.plugins.push(plugin);
-    }
-
-    private applyPlugins(models: Models, repos: Repositories, services: Services) {
-        this.plugins.forEach((plugin) => {
-            try {
-                plugin.transformServices(models, repos, services);
-            } catch (e: any) {
-                throw new Error(`Failed to apply plugins: ${e.message}`);
-            }
-        });
     }
 
 }
