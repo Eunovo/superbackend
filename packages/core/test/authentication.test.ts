@@ -5,6 +5,7 @@ import {
     extractModelsFrom,
     UsernamePasswordAuthPlugin
 } from "../src";
+import { Observable } from "../src/Observable";
 
 
 describe("test authentication plugin", () => {
@@ -42,7 +43,7 @@ describe("test authentication plugin", () => {
             }
         };
 
-        let service = new AuthService(repo);
+        let service = new AuthService(new Observable(), repo);
 
         const authPlugin = new UsernamePasswordAuthPlugin();
         authPlugin

@@ -1,9 +1,19 @@
-export type Listener = (data: any) => void;
+export type Listener = (subject: string, data: any) => void;
 type Listeners = { subject: string, listener: Listener }[]
 
 export class Observable {
 
     private listeners: Listeners = [];
+
+    getObservableFor(subject: string) {
+        const observable = new Observable();
+        observable.subcribe(
+            subject,
+            (subj: string, data: any) =>
+                this.push(`${subject}.${subj}`, data)
+        );
+        return observable;
+    }
 
     subcribe(subject: string, listener: Listener) {
         this.listeners.push({
@@ -21,7 +31,7 @@ export class Observable {
         const listeners = this.listeners
             .filter((value) => value.subject.startsWith(subject));
 
-        listeners.forEach(value => value.listener(data));
+        listeners.forEach(value => value.listener(subject, data));
     }
 
 }

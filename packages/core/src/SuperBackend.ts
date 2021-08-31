@@ -6,9 +6,11 @@ import { CRUDService } from "./crud";
 import { Plugin } from "./plugins";
 import { Model } from "./Model";
 import { CRUDController } from "./controllers/CRUDController";
+import { Observable } from "./Observable";
 
 
 export class SuperBackend {
+    private observable: Observable;
     private plugins: Plugin[];
     private models: Models;
     private repos: Repositories;
@@ -18,10 +20,11 @@ export class SuperBackend {
 
     constructor(private buildRepo: RepoBuilder) {
         this.plugins = [];
-        this.models = {};
-        this.repos = {};
-        this.services = {};
-        this.controllers = {};
+        this.models = { };
+        this.repos = { };
+        this.services = { };
+        this.controllers = { };
+        this.observable = new Observable();
     }
 
     /**
@@ -53,7 +56,7 @@ export class SuperBackend {
                 if (this.repos[model.name]) return prev;
 
                 return { ...prev, [model.name]: repo };
-            }, {});
+            }, { });
 
         this.services = Object.values(this.models)
             .reduce((prev: any, model: Model) => {
@@ -63,9 +66,12 @@ export class SuperBackend {
 
                 return {
                     ...prev,
-                    [model.name]: new CRUDService(repo)
+                    [model.name]: new CRUDService(
+                        this.observable.getObservableFor(model.name.toLowerCase()),
+                        repo
+                    )
                 };
-            }, {});
+            }, { });
 
         this.controllers = Object.values(this.models)
             .reduce((prev: any, model: Model) => {
@@ -76,7 +82,7 @@ export class SuperBackend {
                 const methods = restMetadata?.args.slice(1)
                     .reduce(
                         (prev: any, cur: string) => ({
-                            ...(prev || {}), [cur]: true
+                            ...(prev || { }), [cur]: true
                         }),
                         undefined
                     );
@@ -89,7 +95,7 @@ export class SuperBackend {
                     [model.name]: new CRUDController(
                         route, service, methods)
                 };
-            }, {});
+            }, { });
 
         this.applyPlugins(this.models, this.repos, this.services);
         this.isBuilt = true;
@@ -100,6 +106,10 @@ export class SuperBackend {
             services: { ...this.services },
             controllers: { ...this.controllers }
         };
+    }
+
+    getObservable() {
+        return this.observable;
     }
 
     getAll() {
@@ -149,7 +159,7 @@ export class SuperBackend {
         this.plugins.forEach((plugin) => {
             try {
                 plugin.transformServices(models, repos, services);
-            } catch (e) {
+            } catch (e: any) {
                 throw new Error(`Failed to apply plugins: ${e.message}`);
             }
         });

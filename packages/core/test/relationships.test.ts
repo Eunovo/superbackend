@@ -1,6 +1,7 @@
 import "jest";
 import { buildSchema } from "graphql";
 import { extractModelsFrom, RelationshipPlugin, Service } from "../src";
+import { Observable } from "../src/Observable";
 
 
 describe("Test relationships", () => {
@@ -22,7 +23,7 @@ describe("Test relationships", () => {
         const gqlSchema = buildSchema(schemaString);
         const models = extractModelsFrom(gqlSchema);
         const repos: any = {};
-        const service: any = new Service();
+        const service: any = new Service(new Observable());
         service.create = async function (input: any) {
             const args = await this.runPreMiddleware(
                 'create', { input });

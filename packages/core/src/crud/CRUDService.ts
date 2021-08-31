@@ -1,3 +1,4 @@
+import { Observable } from "../Observable";
 import { FilterOptions, Repository } from "../repositories";
 import { Service } from "../Service";
 import { CRUD_OPERATIONS, CRUDMiddleware } from "./CRUDOps";
@@ -7,8 +8,9 @@ import { Filter } from "./Filter";
 export class CRUDService extends Service {
 
     constructor(
+        observable: Observable,
         protected repo: Repository
-    ) { super() }
+    ) { super(observable) }
 
     async create(input: any, context: any = {}) {
         let args = await this.runPreMiddleware(
