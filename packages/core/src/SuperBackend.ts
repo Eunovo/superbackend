@@ -1,4 +1,4 @@
-import { buildSchema, GraphQLSchema } from "graphql";
+import { buildSchema } from "graphql";
 import { readFileSync } from "fs";
 import { RepoBuilder, Repository } from "./repositories";
 import { extractModelsFrom, MapAll, Models, Repositories, Services } from "./utils";
