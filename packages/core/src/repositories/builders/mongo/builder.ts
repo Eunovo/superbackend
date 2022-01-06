@@ -1,4 +1,4 @@
-import { Model } from "../../../NewModel";
+import { Model } from "../../../Model";
 import { handleMongooseError } from "./error-handler";
 import { buildSchema } from "./schema";
 

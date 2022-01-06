@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { Model, Field } from "../../../NewModel";
+import { Model, Field } from "../../../Model";
 
 /**
  * Build the mongoose schema for

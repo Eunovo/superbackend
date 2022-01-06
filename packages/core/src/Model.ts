@@ -1,66 +1,53 @@
-import { GraphQLType, GraphQLObjectType, GraphQLField } from "graphql";
-import { extractMetadata } from "./utils";
-
-
-type Fields<T = any> = {
-    [P in keyof T]: Field
-}
-
 export class Model {
-    public name: string;
-    public fields: Fields;
-    public metadata: Metadata[];
+    private _name: string
+    private _fields: { [P in keyof any]: Field }
 
-    constructor(
-        public node: GraphQLObjectType
-    ) {
-        this.name = node.name;
-        this.metadata = extractMetadata(node.description || '');
-        const fieldMap = node.getFields();
-
-        this.fields = Object.values(fieldMap).reduce((prev, field) => {
-            return {
-                ...prev,
-                [field.name]: new Field(field)
-            };
-        }, {});
+    constructor(name: string) {
+        this._name = name;
+        this._fields = {};
     }
 
+    get name() { return this._name }
+    get fields() { return Object.values(this._fields) }
+
+    addField(key: string, field: Field) {
+        this._fields = {
+            ...this._fields,
+            [key]: field
+        }
+    }
+
+    getField(name: string) { return this._fields[name] }
 }
 
 export class Field {
-    public name: string;
-    public type: GraphQLType;
-    public metadata: Metadata[];
-    public foreignModel?: string;
-    public foreignKey?: string;
+    private _name: string;
+    private _type: string;
+    private _metadata: any;
 
-    constructor(field: GraphQLField<any, any>) {
-        this.name = field.name;
-        this.type = field.type;
-        this.metadata = extractMetadata(field.description || '');
-        [this.foreignModel, this.foreignKey] = this.extractForeignKey();
+    constructor(name: string, type: string) {
+        this._name = name;
+        this._type = type;
+        this._metadata = {};
     }
 
-    private extractForeignKey() {
-        for (let i in this.metadata) {
-            const { name, args } = this.metadata[i];
-            if (
-                name === 'manytoone' ||
-                name === 'onetomany' ||
-                name === 'onetoone'
-            ) {
-                return args;
-            }
-        };
-
-        return [];
+    get name() { return this._name }
+    get type() { return this._type }
+    get metadata() {
+        return Object.keys(this._metadata).map((key) => ({
+            name: key,
+            value: this._metadata[key]
+        }))
     }
 
-}
+    addMetadata(name: string, value: any) {
+        this._metadata = {
+            ...this._metadata,
+            [name]: value
+        }
+    }
 
-export interface Metadata {
-    name: string;
-    args: any[];
+    getMetadataBy(name: string) {
+        return this._metadata[name];
+    }
 }
-

@@ -1,4 +1,4 @@
-import { Model, Field } from "../NewModel";
+import { Model, Field } from "../Model";
 
 export function model(name?: string) {
     return function <T extends { new(...args: any[]): {} }>(constructor: T) {
