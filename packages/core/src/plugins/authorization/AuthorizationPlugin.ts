@@ -1,5 +1,5 @@
 import { GraphQLSchema, isEnumType } from "graphql";
-import { Model } from "../../Model";
+import { Model } from "../../model/Model";
 import { CRUD_OPERATIONS, CRUDService } from "../../crud";
 import { extractMetadata, MapAll, Models, Repositories } from "../../utils";
 import { Plugin } from "../Plugin";

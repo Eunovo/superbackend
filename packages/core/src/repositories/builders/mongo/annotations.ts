@@ -1,4 +1,4 @@
-import { Metadata } from "../../../Model";
+import { Metadata } from "../../../model/Model";
 import { DB_ANNOTATIONS } from "../../Repository";
 
 export const MONGO_ANNOTATIONS: { [P in DB_ANNOTATIONS] : (metadata: Metadata) => any } = {

@@ -1,5 +1,5 @@
 import { GraphQLNamedType, GraphQLObjectType, GraphQLSchema } from "graphql";
-import { Model, Metadata } from "./Model";
+import { Model, Metadata } from "./model/Model";
 import { Repository } from "./repositories";
 import { Service } from "./Service";
 

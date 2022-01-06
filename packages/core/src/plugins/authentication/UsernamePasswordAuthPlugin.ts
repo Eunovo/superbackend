@@ -1,6 +1,6 @@
 import { hash } from 'bcrypt';
 import { Plugin } from "../Plugin";
-import { Field, Model } from "../../Model";
+import { Field, Model } from "../../model/Model";
 import { Models, Repositories, Services } from "../../utils";
 
 const SALT_ROUNDS = 10;
