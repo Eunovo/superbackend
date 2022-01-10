@@ -1,20 +1,30 @@
-import { compare } from "bcrypt";
+import { compare, hash } from "bcrypt";
 import { UnauthorisedError } from "../../errors";
 import { CRUDService } from "../../crud";
+import { Model, Repository } from "../..";
+import { Observable } from "../../Observable";
 
+const SALT_ROUNDS = 10;
 
 /**
  * This class adds Username and Password
  * Authentication to the Service
  */
 export class AuthService extends CRUDService {
+    private usernameField!: string;
+    private passwordField!: string;
+    protected model?: Model;
+
+    constructor(
+        observable: Observable,
+        repo: Repository,
+    ) {
+        super(observable, repo);
+        this.setup();
+    }
 
     async authenticate(username: string, password: string) {
-        let args = await this.runPreMiddleware(
-            'authenticate', { username, password });
-        const { usernameField, passwordField } = args;
-        username = args.username;
-        password = args.password;
+        const { usernameField, passwordField } = this;
 
         const user = await this.repo
             .findOne({ [usernameField]: username });
@@ -25,10 +35,25 @@ export class AuthService extends CRUDService {
         if (!isMatch)
             throw new UnauthorisedError();
 
-        args = await this.runPostMiddleware(
-            'authenticate', { ...args, user });
+        return user;
+    }
 
-        return args.user;
+    setup() {
+        this.model?.fields.forEach((field) => {
+            if (field.getMetadataBy('username'))
+                this.usernameField = field.name;
+            if (field.getMetadataBy('password'))
+                this.passwordField = field.name;
+        });
+        this.pre(
+            ['create', 'updateOne', 'updateMany'],
+            async (args: any) => {
+                if (!args.input[this.passwordField]) return;
+
+                const password = args.input[this.passwordField];
+                const hashedPassword = await hash(password, SALT_ROUNDS);
+                args.input[this.passwordField] = hashedPassword;
+            });
     }
 
 }

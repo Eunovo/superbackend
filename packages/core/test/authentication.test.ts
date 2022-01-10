@@ -1,30 +1,23 @@
 import "jest";
-import { buildSchema } from "graphql";
 import {
-    AuthService,
-    extractModelsFrom,
-    UsernamePasswordAuthPlugin
+    AuthService, getModel, Model,
 } from "../src";
 import { Observable } from "../src/Observable";
+import { model, field, username, password } from "../src";
 
+@model('User')
+export class User {
+    @username()
+    @field('username', 'String')
+    username?: string;
+
+    @password()
+    @field('password', 'String')
+    password?: string;
+}
 
 describe("test authentication plugin", () => {
     test("it should hash password on create and update and provide an 'authenticate' method ", async () => {
-        const gqlSchemaString = `
-        """
-        @model
-        @usernamepasswordauth
-        """
-        type User {
-            """ @username """
-            username: String!
-            """ @password """
-            password: String!
-        }
-        `;
-        const gqlSchema = buildSchema(gqlSchemaString);
-        const models = extractModelsFrom(gqlSchema);
-
         const username = 'test';
         const password = 'password';
         let testUser: any;
@@ -43,11 +36,7 @@ describe("test authentication plugin", () => {
             }
         };
 
-        let service = new AuthService(new Observable(), repo);
-
-        const authPlugin = new UsernamePasswordAuthPlugin();
-        authPlugin
-            .transformServices(models, { 'User': repo }, { 'User': service });
+        let service = new UserService(new Observable(), repo);
 
         await service.create({ username, password });
         await service.authenticate(username, password);
@@ -62,3 +51,8 @@ describe("test authentication plugin", () => {
         expect.assertions(4);
     });
 });
+
+
+class UserService extends AuthService {
+    @getModel(User) protected model?: Model;
+}

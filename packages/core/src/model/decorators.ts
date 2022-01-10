@@ -1,27 +1,28 @@
 import { Model, Field } from "./Model";
+import { createMetadataDecorator } from "./utils";
 
-export function model(name?: string) {
+export const MODELS: any = {};
+export const FIELDS: any = {};
+let fieldKey = Symbol("key");
+
+export function model(name: string) {
     return function <T extends { new(...args: any[]): {} }>(constructor: T) {
-        return class extends constructor {
-            _model = new Model(name ?? constructor.name);
-        };
+        MODELS[constructor] = new Model(name, FIELDS[fieldKey]);
+        fieldKey = Symbol("key");
+    }
+}
+
+export function getModel<T extends { new(...args: any[]): {} }>(constructor: T) {
+    return function(target: any, propertyKey: string, ) {
+        target[propertyKey] = MODELS[constructor];
     }
 }
 
 export function field(name: string, type: string) {
     return function (target: any, propertyKey: string) {
-        if (!target._model) throw new Error("Class is not a model");
-
-        const field = new Field(name ?? propertyKey, type);
-        (target._model as Model).addField(propertyKey, field);
-    }
-}
-
-function createMetadataDecorator(name: string, value: any = true) {
-    return function (target: any, propertyKey: string) {
-        if (!target._model) throw new Error("Class is not a model");
-
-        (target._model as Model).getField(propertyKey).addMetadata(name, value);
+        target._fieldKey = fieldKey;
+        const field = new Field(name ?? propertyKey, propertyKey, type);
+        FIELDS[fieldKey] = { ...(FIELDS[fieldKey] || {}), [propertyKey]: field };
     }
 }
 

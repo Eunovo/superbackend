@@ -1,2 +1,2 @@
 export * from './UsernamePasswordAuthService';
-export * from './UsernamePasswordAuthPlugin';
+export * from './decorators';
