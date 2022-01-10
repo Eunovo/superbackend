@@ -1,22 +1,26 @@
 import {
     Document,
     Model as MongooseModel,
-    model as createMongooseModel
+    model as createMongooseModel,
+    FilterQuery
 } from "mongoose";
 import { Repository, FilterOptions } from "../..";
+import { Model } from "../../..";
 import { buildMongoSchema } from "./builder";
+
+type ModelType<T> = T & Document;
 
 export class MongoRepository<T> implements Repository {
 
-    protected mongooseModel: MongooseModel<Document<T>>;
+    protected mongooseModel: MongooseModel<ModelType<T>>;
 
-    constructor(model: T) {
-        const name = (model as any)._model.name;
-        const schema = buildMongoSchema((model as any)._model);
+    constructor(model: Model) {
+        const name = model.name;
+        const schema = buildMongoSchema(model);
         this.mongooseModel = createMongooseModel(name, schema);
     }
 
-    async create(data: any) {
+    async create(data: T) {
         await this.mongooseModel.init();
         const model = new this.mongooseModel(data);
         await model.save();
@@ -24,14 +28,14 @@ export class MongoRepository<T> implements Repository {
         return model.id;
     }
 
-    async findOne(filter: any) {
+    async findOne(filter: FilterQuery<ModelType<T>>) {
         const result = await this.mongooseModel.findOne(filter)
             .lean()
             .exec();
         return result;
     }
 
-    async findMany(filter: any, options?: FilterOptions) {
+    async findMany(filter: FilterQuery<ModelType<T>>, options?: FilterOptions) {
         const query = this.mongooseModel.find(filter);
 
         ['limit', 'skip'].forEach((key) => {
@@ -43,24 +47,24 @@ export class MongoRepository<T> implements Repository {
         return results;
     }
 
-    async updateOne(filter: any, update: any) {
+    async updateOne(filter: FilterQuery<ModelType<T>>, update: any) {
         await this.mongooseModel.init();
         await this.mongooseModel.updateOne(filter, update)
             .exec();
     }
 
-    async updateMany(filter: any, update: any) {
+    async updateMany(filter: FilterQuery<ModelType<T>>, update: any) {
         await this.mongooseModel.init();
         await this.mongooseModel.updateMany(filter, update)
             .exec();
     }
 
-    async removeOne(filter: any) {
+    async removeOne(filter: FilterQuery<ModelType<T>>) {
         await this.mongooseModel.findOneAndRemove(filter)
             .exec();
     }
 
-    async removeMany(filter: any) {
+    async removeMany(filter: FilterQuery<ModelType<T>>) {
         await this.mongooseModel.remove(filter)
             .exec();
     }

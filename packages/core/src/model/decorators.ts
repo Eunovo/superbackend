@@ -1,3 +1,4 @@
+import container from "../inversify.config";
 import { Model, Field } from "./Model";
 import { createMetadataDecorator } from "./utils";
 
@@ -8,13 +9,14 @@ let fieldKey = Symbol("key");
 export function model(name: string) {
     return function <T extends { new(...args: any[]): {} }>(constructor: T) {
         MODELS[constructor] = new Model(name, FIELDS[fieldKey]);
+        container.bind<Model>(constructor).toConstantValue(MODELS[constructor]);
         fieldKey = Symbol("key");
     }
 }
 
 export function getModel<T extends { new(...args: any[]): {} }>(constructor: T) {
     return function(target: any, propertyKey: string, ) {
-        target[propertyKey] = MODELS[constructor];
+        target[propertyKey] = container.get(constructor);
     }
 }
 
