@@ -1,6 +1,21 @@
 import { Model, Field } from "../..";
 
 export const getAccessGroupsFrom = (model: Model, obj: any, principal?: any) => {
+    const groups = [
+        {
+            group: 'public',
+            input: true,
+            filter: 'all'
+        }
+    ];
+    if (principal?.role) {
+        groups.push({
+            group: principal?.role,
+            input: true,
+            filter: 'all'
+        });
+    }
+
     return model.fields.reduce((acc: any[], field: Field) => {
         if (!principal) return acc;
 
@@ -18,13 +33,7 @@ export const getAccessGroupsFrom = (model: Model, obj: any, principal?: any) => 
                 filter: { [key]: principal[matcher] }
             }
         ];
-    }, [
-        {
-            group: principal?.role || 'public',
-            input: true,
-            filter: 'all'
-        }
-    ]);
+    }, groups);
 }
 
 export const makeSafeFilter = (filter: any, orFilter: any[]) => {
