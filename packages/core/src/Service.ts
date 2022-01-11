@@ -18,16 +18,19 @@ export class Service {
         this.postMiddleware = new Map();
 
         let obj = this;
+        // TODO fix bug where middleware is not set in
+        // functions called from constructor
         do {
-            Object.getOwnPropertyNames(obj).forEach(async (key) => {
+            Object.getOwnPropertyNames(obj).forEach((key) => {
                 if (!(obj as any)[key].call) return;
                 const method = (obj as any)[key] as Function;
                 (obj as any)[key] = async (...args: any[]) => {
                     let newArgs = await this.runPreMiddleware(method.name, ...args);
-                    const result = method.apply(this, ...newArgs);
+                    const result = await method.apply(this, newArgs);
+                    if (!result) return;
+
                     return this.runPostMiddleware(method.name, result);
                 };
-                (obj as any)[key].bind(this);
             });
 
             if ((obj as any).__proto__ === Service.prototype)
@@ -53,9 +56,9 @@ export class Service {
         return this.runMiddleware(middleware, method, ...args);
     }
 
-    runPostMiddleware(method: string, args: any) {
+    async runPostMiddleware(method: string, args: any) {
         const middleware = this.postMiddleware.get(method) || [];
-        return this.runMiddleware(middleware, method, ...args);
+        return (await this.runMiddleware(middleware, method, args))[0];
     }
 
     pre(methods: string | string[], middleware: Middleware) {
