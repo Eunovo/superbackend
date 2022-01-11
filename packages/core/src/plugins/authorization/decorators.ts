@@ -37,7 +37,7 @@ export function authorize(modelConstructor: any) {
             (_: string, input: any, context: any, ...args: any[]) => {
                 const modelPermissions = ACCESSPERMISSIONS[model.getMetadataBy('access-tag')];
                 const permissions = modelPermissions.create;
-                const groups = getAccessGroupsFrom(model, input, context.principal);
+                const groups = getAccessGroupsFrom(model, input, context?.principal);
                 let canCreate = false;
                 groups.forEach(({ group, input }) => {
                     canCreate = canCreate || (permissions[group] && input);
@@ -57,7 +57,7 @@ export function authorize(modelConstructor: any) {
                 const permissions = modelPermissions[
                     method.startsWith('find') ? 'read': 'delete'
                 ];
-                const groups = getAccessGroupsFrom(model, filter, context.principal);
+                const groups = getAccessGroupsFrom(model, filter, context?.principal);
                 let orFilter: any[] | null = [];
 
                 groups.forEach(({ group, filter }) => {
@@ -82,7 +82,7 @@ export function authorize(modelConstructor: any) {
             (_: string, input: any, filter: any, context: any, ...args: any[]) => {
                 const modelPermissions = ACCESSPERMISSIONS[model.getMetadataBy('access-tag')];
                 const permissions = modelPermissions.read;
-                const groups = getAccessGroupsFrom(model, filter, context.principal);
+                const groups = getAccessGroupsFrom(model, filter, context?.principal);
                 let orFilter: any[] | null = [];
                 let canUpdate = false;
 
