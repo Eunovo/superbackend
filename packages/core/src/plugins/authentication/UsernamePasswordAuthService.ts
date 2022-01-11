@@ -20,7 +20,23 @@ export class AuthService extends CRUDService {
         repo: Repository,
     ) {
         super(observable, repo);
-        this.setup();
+        
+        this.model?.fields.forEach((field) => {
+            if (field.getMetadataBy('username'))
+                this.usernameField = field.name;
+            if (field.getMetadataBy('password'))
+                this.passwordField = field.name;
+        });
+        this.pre(
+            ['create', 'updateOne', 'updateMany'],
+            async (_, input: any, ...args: any[]) => {
+                if (!input[this.passwordField]) return [input, ...args];
+
+                const password = input[this.passwordField];
+                const hashedPassword = await hash(password, SALT_ROUNDS);
+
+                return [{ ...input, [this.passwordField]: hashedPassword }, ...args];
+            });
     }
 
     async authenticate(username: string, password: string) {
@@ -36,24 +52,6 @@ export class AuthService extends CRUDService {
             throw new UnauthorisedError();
 
         return user;
-    }
-
-    setup() {
-        this.model?.fields.forEach((field) => {
-            if (field.getMetadataBy('username'))
-                this.usernameField = field.name;
-            if (field.getMetadataBy('password'))
-                this.passwordField = field.name;
-        });
-        this.pre(
-            ['create', 'updateOne', 'updateMany'],
-            async (args: any) => {
-                if (!args.input[this.passwordField]) return;
-
-                const password = args.input[this.passwordField];
-                const hashedPassword = await hash(password, SALT_ROUNDS);
-                args.input[this.passwordField] = hashedPassword;
-            });
     }
 
 }
