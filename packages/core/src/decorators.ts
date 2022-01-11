@@ -11,5 +11,5 @@ export function inject(tag: any) {
 export function getParameters() {
     const params = injectedParameters.map(({ tag }) => container.get(tag));
     injectedParameters = [];
-    return params;
+    return params.reverse();
 }
