@@ -46,7 +46,7 @@ export const makeSafeFilter = (filter: any, orFilter: any[]) => {
             { $or: newFilter.$or },
             { $or: orFilter }
         ];
-        newFilter.$or = [];
+        newFilter.$or = undefined;
     }
     return newFilter;
 }

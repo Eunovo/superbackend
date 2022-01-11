@@ -69,7 +69,7 @@ export function authorize(modelConstructor: any) {
                     orFilter?.push(filter);
                 });
 
-                if (orFilter) {
+                if (orFilter && orFilter.length > 0) {
                     filter = makeSafeFilter(filter, orFilter);
                 }
 
@@ -97,7 +97,7 @@ export function authorize(modelConstructor: any) {
                     orFilter?.push(filter);
                 });
 
-                if (orFilter) {
+                if (orFilter && orFilter.length > 0) {
                     filter = makeSafeFilter(filter, orFilter);
                 }
                 if (!canUpdate)
