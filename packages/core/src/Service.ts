@@ -1,8 +1,10 @@
 import { Observable } from "./Observable";
+import container from "./inversify.config";
+import { getParameters } from "./decorators";
 
 export type Middleware = (
-    args: any, method: string, operation: any
-) => Promise<void> | void;
+    method: string, ...args: any[]
+) => Promise<any[]> | any[];
 
 
 export class Service {
@@ -14,29 +16,46 @@ export class Service {
         this.observable = observable;
         this.preMiddleware = new Map();
         this.postMiddleware = new Map();
+
+        let obj = this;
+        do {
+            Object.getOwnPropertyNames(obj).forEach(async (key) => {
+                if (!(obj as any)[key].call) return;
+                const method = (obj as any)[key] as Function;
+                (obj as any)[key] = async (...args: any[]) => {
+                    let newArgs = await this.runPreMiddleware(method.name, ...args);
+                    const result = method.apply(this, ...newArgs);
+                    return this.runPostMiddleware(method.name, result);
+                };
+                (obj as any)[key].bind(this);
+            });
+
+            if ((obj as any).__proto__ === Service.prototype)
+                break;
+        } while (obj = Object.getPrototypeOf(obj))
     }
 
     protected fire(event: string, data?: any) {
         this.observable.push(event, data);
     }
 
-    protected async runMiddleware(middleware: Middleware[], args: any, method: string) {
+    protected async runMiddleware(middleware: Middleware[], method: string, ...args: any[]) {
         let i = 0;
         while (i < middleware.length) {
-            await middleware[i](args, method, method);
+            args = await middleware[i](method, ...args);
             i++;
         }
         return args;
     }
 
-    runPreMiddleware(method: string, args: any) {
+    runPreMiddleware(method: string, ...args: any) {
         const middleware = this.preMiddleware.get(method) || [];
-        return this.runMiddleware(middleware, args, method);
+        return this.runMiddleware(middleware, method, ...args);
     }
 
     runPostMiddleware(method: string, args: any) {
         const middleware = this.postMiddleware.get(method) || [];
-        return this.runMiddleware(middleware, args, method);
+        return this.runMiddleware(middleware, method, ...args);
     }
 
     pre(methods: string | string[], middleware: Middleware) {
@@ -55,4 +74,11 @@ export class Service {
         });
     }
 
+}
+
+export function service() {
+    return function (constructor: any) {
+        const params = getParameters();
+        container.bind(constructor).toConstantValue(new constructor(...params));
+    }
 }
