@@ -1,4 +1,14 @@
 import { HttpMethods } from "./BaseController";
+import container from "../inversify.config";
+import { getParameters } from "../decorators";
+
+export function controller() {
+    return function (constructor: any) {
+        const params = getParameters();
+        container.bind(constructor)
+            .toConstantValue(new constructor(...params))
+    }
+}
 
 function createDecoratorFor(method: HttpMethods, route: string) {
     return function (target: any, propertyKey: string) {
