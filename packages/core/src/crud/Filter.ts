@@ -1,5 +1,3 @@
 import { FilterQuery } from 'mongoose';
 
-export interface Filter extends FilterQuery<any> {
-
-}
+export type Filter<T = any> = FilterQuery<T>;
