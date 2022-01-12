@@ -52,13 +52,18 @@ export function authorize(modelConstructor: any) {
 
         service.pre(
             ['findOne', 'findMany', 'removeOne', 'removeMany'],
-            (method: string, filter: any, context: any, ...args: any[]) => {
+            (method: string, filter: any, ...args: any[]) => {
+                let context = args[0];
+                if (method === 'findMany') {
+                    context = args[1];
+                }
+
                 const modelPermissions = ACCESSPERMISSIONS[model.getMetadataBy('access-tag')];
                 const permissions = modelPermissions[
                     method.startsWith('find') ? 'read': 'delete'
                 ];
                 const groups = getAccessGroupsFrom(model, filter, context?.principal);
-                let orFilter: any[] | null = [];
+                let orFilter: any[] | null = [{ $expr: { $eq: [0, 1] } }];
 
                 groups.forEach(({ group, filter }) => {
                     if (!permissions[group]) return;
