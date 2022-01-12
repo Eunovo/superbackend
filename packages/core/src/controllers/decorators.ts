@@ -1,15 +1,11 @@
 import { HttpMethods } from "./BaseController";
 import container from "../inversify.config";
 import { getParameters } from "../decorators";
-import { BaseController } from "./BaseController";
-
-export const CONTROLLERS: BaseController[] = [];
 
 export function controller() {
     return function (constructor: any) {
         const params = getParameters();
         const controller =  new constructor(...params);
-        CONTROLLERS.push(controller);
         container.bind(constructor)
             .toConstantValue(controller)
     }
