@@ -7,4 +7,5 @@ export * from './crud';
 export * from './plugins';
 export * from './errors';
 export * from './decorators';
+export * from './inversify.config';
 export * from './Observable';
