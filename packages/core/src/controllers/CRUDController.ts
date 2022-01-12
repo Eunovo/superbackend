@@ -1,5 +1,6 @@
 import { CRUDService, CRUD } from "../crud";
 import { BaseController } from "./BaseController";
+import { IRequest } from "./IRequest";
 
 /**
  * Selects which CRUD operations to expose
@@ -10,7 +11,7 @@ const DEFAULT_METHODS: Methods = {
     create: true, read: true, update: true, delete: true
 }
 
-export class CRUDController extends BaseController {
+export class CRUDController<T = any> extends BaseController {
     constructor(
         public readonly route: string,
         protected service: CRUDService,
@@ -25,7 +26,7 @@ export class CRUDController extends BaseController {
         this.methods.delete && this.delete('/', this.removeMany.bind(this));
     }
 
-    async create(req: any) {
+    async create(req: IRequest<T, Partial<T>, {}>) {
         const _id = await this.service.create(
             req.body,
             {
@@ -40,8 +41,8 @@ export class CRUDController extends BaseController {
         };
     }
 
-    async getMany(req: any) {
-        const { _limit, _skip, ...filter } = req.query;
+    async getMany(req: IRequest<T, Partial<T> & { _limit?: number, _skip?: number }, {}>) {
+        const { _limit, _skip, ...filter } = req.query || {};
 
         const data = {
             results: await this.service.findMany(
@@ -59,8 +60,8 @@ export class CRUDController extends BaseController {
         };
     }
 
-    async updateMany(req: any) {
-        const { _limit, _skip, ...filter } = req.query;
+    async updateMany(req: IRequest<T, Partial<T>, {}>) {
+        const filter = req.query || {};
         await this.service.updateMany(
             req.body, filter,
             {
@@ -74,8 +75,8 @@ export class CRUDController extends BaseController {
         };
     }
 
-    async removeMany(req: any) {
-        const { _limit, _skip, ...filter } = req.query;
+    async removeMany(req: IRequest<T, Partial<T>, {}>) {
+        const filter = req.query || {};
         await this.service.removeMany(
             filter,
             {
