@@ -2,18 +2,31 @@ import { HttpMethods } from "./BaseController";
 import container from "../inversify.config";
 import { getParameters } from "../decorators";
 
+let HANDLERS: any[] = [];
+
 export function controller() {
-    return function (constructor: any) {
+    return function <T extends { new(...args: any[]): {} }>(constructor: T) {
+        const ControllerClass = class extends constructor {
+            constructor (...args: any[]) {
+                super(...args);
+                HANDLERS.forEach(({ method, route, handler }) => {
+                    (this as any)[method](route, handler.bind(this));
+                });
+                HANDLERS = [];
+            }
+        };
+
         const params = getParameters();
-        const controller =  new constructor(...params);
-        container.bind(constructor)
-            .toConstantValue(controller)
+        const controller =  new ControllerClass(...params);
+        container.bind(ControllerClass)
+            .toConstantValue(controller);
+        return ControllerClass;
     }
 }
 
 function createDecoratorFor(method: HttpMethods, route: string) {
     return function (target: any, propertyKey: string) {
-        target[method](route, target[propertyKey].bind(target));
+        HANDLERS.push({ method, route, handler: target[propertyKey] });
     };
 }
 

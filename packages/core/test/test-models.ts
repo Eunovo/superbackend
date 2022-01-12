@@ -3,10 +3,8 @@ import {
     MongoRepository, repo, AuthService,
     controller, service, inject,
     accessControl, authorize,
-    userGroup,
-    CRUDController,
-    getModel,
-    Model
+    userGroup, CRUDController,
+    getModel, Model, get
 } from "../src";
 import { Observable } from "../src/Observable";
 
@@ -46,4 +44,10 @@ export class UserController extends CRUDController {
     ) {
         super('/users',service);
     }
+
+    @get('/get')
+    test(req: any) {
+        return super.getMany(req);
+    }
+
 }

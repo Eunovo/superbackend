@@ -1,5 +1,5 @@
 export class BaseController {
-    private handlers: Map<string, Handler>;
+    private handlers: Map<string, Handler> = new Map();
 
     constructor(
         public readonly route: string,

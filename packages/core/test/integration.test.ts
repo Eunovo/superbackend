@@ -96,11 +96,11 @@ describe("CRUD test", () => {
         });
     });
 
-    test("it should handle rest request appropriately", async () => {
+    test.only("it should handle rest request appropriately", async () => {
         const USER_ROUTE = '/users'
         expect(userController.route).toEqual(USER_ROUTE);
         const postHandler = userController.getHandler(`${USER_ROUTE}/`, 'post');
-        const getHandler = userController.getHandler(`${USER_ROUTE}/`, 'get');
+        const getHandler = userController.getHandler(`${USER_ROUTE}/get`, 'get');
         
         if (!postHandler || !getHandler) fail('Handler is not defined');
 
