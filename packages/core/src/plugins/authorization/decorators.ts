@@ -1,4 +1,6 @@
-import { createMetadataDecorator, CRUDService, Model, UnauthorisedError } from "../..";
+import { createMetadataDecorator, Model } from "../../model";
+import { CRUDService } from "../../crud";
+import { UnauthorisedError } from "../../errors";
 import container from "../../inversify.config";
 import { getAccessGroupsFrom, makeSafeFilter } from "./utils";
 

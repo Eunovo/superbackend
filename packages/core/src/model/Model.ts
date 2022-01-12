@@ -1,4 +1,4 @@
-import { MapAll } from "..";
+import { MapAll } from "../utils";
 
 class Metadata {
     private _metadata: any;

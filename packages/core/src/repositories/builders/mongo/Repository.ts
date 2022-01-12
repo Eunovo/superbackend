@@ -4,8 +4,8 @@ import {
     model as createMongooseModel,
     FilterQuery
 } from "mongoose";
-import { Repository, FilterOptions } from "../..";
-import { Model } from "../../..";
+import { Repository, FilterOptions } from "../../Repository";
+import { Model } from "../../../model";
 import { buildMongoSchema } from "./builder";
 
 type ModelType<T> = T & Document;

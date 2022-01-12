@@ -1,7 +1,8 @@
 import { compare, hash } from "bcrypt";
 import { UnauthorisedError } from "../../errors";
 import { CRUDService } from "../../crud";
-import { Model, Repository } from "../..";
+import { Model } from "../../model";
+import { Repository } from "../../repositories";
 import { Observable } from "../../Observable";
 
 const SALT_ROUNDS = 10;

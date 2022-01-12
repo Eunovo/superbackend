@@ -1,4 +1,4 @@
-import { Model, Field } from "../..";
+import { Model, Field } from "../../model";
 
 export const getAccessGroupsFrom = (model: Model, obj: any, principal?: any) => {
     const groups = [

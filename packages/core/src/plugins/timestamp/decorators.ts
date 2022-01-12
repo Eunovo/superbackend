@@ -1,4 +1,5 @@
-import { createMetadataDecorator, CRUDService, Field, Model } from "../..";
+import { createMetadataDecorator, Field, Model } from "../../model";
+import { CRUDService } from "../../crud";
 import container from "../../inversify.config";
 
 export function createdAt() {
