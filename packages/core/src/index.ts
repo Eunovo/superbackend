@@ -1,3 +1,5 @@
+import container from './inversify.config';
+
 export * from './model';
 export * from './repositories';
 export * from './utils';
@@ -7,5 +9,5 @@ export * from './crud';
 export * from './plugins';
 export * from './errors';
 export * from './decorators';
-export * as container from './inversify.config';
 export * from './Observable';
+export { container };
