@@ -11,7 +11,7 @@ const SALT_ROUNDS = 10;
  * This class adds Username and Password
  * Authentication to the Service
  */
-export class AuthService extends CRUDService {
+export class AuthService<T = any> extends CRUDService<T> {
     private usernameField!: string;
     private passwordField!: string;
     protected model?: Model;
