@@ -1,7 +1,7 @@
 import "jest";
 import { connect, connection } from "mongoose";
 import {
-    defaultValue, field, model,
+    defaultValue, field, inject, Model, model,
     MongoRepository, repo, required, unique
 } from "../src";
 import container from "../src/inversify.config";
@@ -33,7 +33,7 @@ describe("Test MongoDB repo builder", () => {
         const repo = container.get(UserRepo);
 
         const username = "Novo";
-        await repo.create({ username });
+        await repo.create({ username, email: 'email' });
         let user = await repo.findOne({ username });
         expect(user?.username).toEqual(username);
 
@@ -109,6 +109,10 @@ class User {
     @required()
     @field('username', 'String')
     username!: string
+
+    @required()
+    @field('email', 'String')
+    email!: string
 }
 
 @model('TestMetadata')
@@ -133,11 +137,23 @@ class TestError {
     createdAt!: Date
 }
 
-@repo(User)
-class UserRepo extends MongoRepository<User> {}
+@repo()
+class UserRepo extends MongoRepository<User> {
+    constructor(@inject(User) model: Model) {
+        super(model);
+    }
+}
 
-@repo(TestMetadata)
-class TestMetadataRepo extends MongoRepository<TestMetadata> {}
+@repo()
+class TestMetadataRepo extends MongoRepository<TestMetadata> {
+    constructor(@inject(TestMetadata) model: Model) {
+        super(model);
+    }
+}
 
-@repo(TestError)
-class TestErrorRepo extends MongoRepository<TestError> {}
+@repo()
+class TestErrorRepo extends MongoRepository<TestError> {
+    constructor(@inject(TestError) model: Model) {
+        super(model);
+    }
+}

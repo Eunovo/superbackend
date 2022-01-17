@@ -21,8 +21,12 @@ export class User {
     password!: string;
 }
 
-@repo(User)
-export class UserRepo extends MongoRepository<User> {}
+@repo()
+export class UserRepo extends MongoRepository<User> {
+    constructor(@inject(User) model: Model) {
+        super(model);
+    }
+}
 
 @authorize(User)
 @service()
