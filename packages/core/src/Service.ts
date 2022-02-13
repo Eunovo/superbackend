@@ -16,26 +16,6 @@ export class Service {
         this.observable = observable;
         this.preMiddleware = new Map();
         this.postMiddleware = new Map();
-
-        let obj = this;
-        // TODO fix bug where middleware is not set in
-        // functions called from constructor
-        do {
-            Object.getOwnPropertyNames(obj).forEach((key) => {
-                if (!(obj as any)[key].call) return;
-                const method = (obj as any)[key] as Function;
-                (obj as any)[key] = async (...args: any[]) => {
-                    let newArgs = await this.runPreMiddleware(method.name, ...args);
-                    const result = await method.apply(this, newArgs);
-                    if (!result) return;
-
-                    return this.runPostMiddleware(method.name, result);
-                };
-            });
-
-            if ((obj as any).__proto__ === Service.prototype)
-                break;
-        } while (obj = Object.getPrototypeOf(obj))
     }
 
     protected fire(event: string, data?: any) {
@@ -83,5 +63,19 @@ export function service() {
     return function (constructor: any) {
         const params = getParameters();
         container.bind(constructor).toConstantValue(new constructor(...params));
+    }
+}
+
+export function middleware() {
+    return function (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
+        const method = descriptor.value!;
+
+        descriptor.value = async function (...args: any[]) {
+            let newArgs = await (<Service>this).runPreMiddleware(method.name, ...args);
+            const result = await method.apply(this, newArgs);
+            if (!result) return result;
+
+            return (<Service>this).runPostMiddleware(method.name, result);
+        }
     }
 }

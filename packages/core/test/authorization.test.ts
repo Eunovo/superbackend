@@ -27,7 +27,7 @@ describe("Test Authorization", () => {
         await expect(storeService
             .create({ owner: impostor }, context))
             .rejects;
-        storeService
+        await storeService
             .create({ owner: username }, context);
 
         let filter = await storeService
@@ -58,7 +58,7 @@ class Store {
     owner!: string
 }
 
-@repo(Store)
+@repo()
 class StoreRepo {
     create() {}
 

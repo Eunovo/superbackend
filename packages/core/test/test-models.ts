@@ -4,7 +4,7 @@ import {
     controller, service, inject,
     accessControl, authorize,
     userGroup, CRUDController,
-    getModel, Model, get
+    getModel, Model, get, CRUDService
 } from "../src";
 import { Observable } from "../src/Observable";
 
@@ -25,6 +25,13 @@ export class User {
 export class UserRepo extends MongoRepository<User> {
     constructor(@inject(User) model: Model) {
         super(model);
+    }
+}
+
+@service()
+export class TestService extends CRUDService {
+    constructor() {
+        super(({} as any), ({} as any));
     }
 }
 

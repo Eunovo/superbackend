@@ -96,7 +96,7 @@ describe("CRUD test", () => {
         });
     });
 
-    test.only("it should handle rest request appropriately", async () => {
+    test("it should handle rest request appropriately", async () => {
         const USER_ROUTE = '/users'
         expect(userController.route).toEqual(USER_ROUTE);
         const postHandler = userController.getHandler(`${USER_ROUTE}/`, 'post');
