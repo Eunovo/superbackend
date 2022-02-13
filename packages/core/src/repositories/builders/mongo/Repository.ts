@@ -8,11 +8,8 @@ import { Repository, FilterOptions } from "../../Repository";
 import { Model } from "../../../model";
 import { buildMongoSchema } from "./builder";
 
-type ModelType<T> = T & Document;
-
 export class MongoRepository<T> implements Repository {
-
-    protected mongooseModel: MongooseModel<ModelType<T>>;
+    protected mongooseModel: MongooseModel<Document<T>>;
 
     constructor(model: Model) {
         const name = model.name;
@@ -28,14 +25,14 @@ export class MongoRepository<T> implements Repository {
         return model.id;
     }
 
-    async findOne(filter: FilterQuery<ModelType<T>>) {
+    async findOne(filter: FilterQuery<Document<T>>) {
         const result = await this.mongooseModel.findOne(filter)
             .lean()
             .exec();
         return result;
     }
 
-    async findMany(filter: FilterQuery<ModelType<T>>, options?: FilterOptions) {
+    async findMany(filter: FilterQuery<Document<T>>, options?: FilterOptions) {
         const query = this.mongooseModel.find(filter);
 
         ['limit', 'skip'].forEach((key) => {
@@ -47,24 +44,24 @@ export class MongoRepository<T> implements Repository {
         return results;
     }
 
-    async updateOne(filter: FilterQuery<ModelType<T>>, update: any) {
+    async updateOne(filter: FilterQuery<Document<T>>, update: any) {
         await this.mongooseModel.init();
         await this.mongooseModel.updateOne(filter, update)
             .exec();
     }
 
-    async updateMany(filter: FilterQuery<ModelType<T>>, update: any) {
+    async updateMany(filter: FilterQuery<Document<T>>, update: any) {
         await this.mongooseModel.init();
         await this.mongooseModel.updateMany(filter, update)
             .exec();
     }
 
-    async removeOne(filter: FilterQuery<ModelType<T>>) {
+    async removeOne(filter: FilterQuery<Document<T>>) {
         await this.mongooseModel.findOneAndRemove(filter)
             .exec();
     }
 
-    async removeMany(filter: FilterQuery<ModelType<T>>) {
+    async removeMany(filter: FilterQuery<Document<T>>) {
         await this.mongooseModel.remove(filter)
             .exec();
     }
