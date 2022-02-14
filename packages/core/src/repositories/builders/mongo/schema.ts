@@ -26,11 +26,32 @@ function getDefinition(field: Field) {
         'required',
         'unique',
         'default',
-        'immutable',
+        'immutable'
     ].forEach((name) => {
         const value = field.getMetadataBy(name);
         definition[name] = value;
     });
 
+    const enums = field.getMetadataBy('enum');
+    if (enums) definition.enums = parseToSchemaEnums(enums);
+
+    const arrayType = getArrayType(definition.type);
+    if (arrayType !== null) {
+        return [{ ...definition, type: arrayType }]
+    }
+
     return definition;
+}
+
+function getArrayType(type: string) {
+    const isArrayType = type.startsWith('[') && type.endsWith(']');
+    if (!isArrayType) return null;
+    return type.substring(1, type.length - 1);
+}
+
+function parseToSchemaEnums(type: any) {
+    if (type instanceof String)
+        return type.split('|').map((v) => v.trim());
+
+    return Object.values(type).filter(v => v instanceof String);
 }

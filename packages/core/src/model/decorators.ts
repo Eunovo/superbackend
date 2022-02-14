@@ -20,7 +20,7 @@ export function getModel<T extends { new(...args: any[]): {} }>(constructor: T) 
     }
 }
 
-export function field(name: string, type: string) {
+export function field(name: string, type: any) {
     return function (target: any, propertyKey: string) {
         target._fieldKey = fieldKey;
         const field = new Field(name ?? propertyKey, propertyKey, type);
@@ -42,6 +42,10 @@ export function immutable() {
 
 export function defaultValue(value: any) {
     return createMetadataDecorator('default', value);
+}
+
+export function enums(value: any) {
+    return createMetadataDecorator('enum', value);
 }
 
 export function oneToOne(modelName: string, key: string) {

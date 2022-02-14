@@ -2,7 +2,8 @@ import {
     Document,
     Model as MongooseModel,
     model as createMongooseModel,
-    FilterQuery
+    FilterQuery,
+    LeanDocument
 } from "mongoose";
 import { Repository, FilterOptions } from "../../Repository";
 import { Model } from "../../../model";
@@ -29,7 +30,7 @@ export class MongoRepository<T> implements Repository {
         const result = await this.mongooseModel.findOne(filter)
             .lean()
             .exec();
-        return result;
+        return result as LeanDocument<T> | null;
     }
 
     async findMany(filter: FilterQuery<Document<T>>, options?: FilterOptions) {
@@ -41,7 +42,7 @@ export class MongoRepository<T> implements Repository {
         });
 
         const results = await query.lean().exec();
-        return results;
+        return results as LeanDocument<T>[];
     }
 
     async updateOne(filter: FilterQuery<Document<T>>, update: any) {

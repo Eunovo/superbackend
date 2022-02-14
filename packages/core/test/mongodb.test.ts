@@ -1,10 +1,11 @@
 import "jest";
 import { connect, connection } from "mongoose";
 import {
-    defaultValue, field, inject, Model, model,
+    defaultValue, enums, field, inject, Model, model,
     MongoRepository, repo, required, unique
 } from "../src";
 import container from "../src/inversify.config";
+import { buildSchema } from "../src/repositories/builders/mongo/schema";
 
 const DB_URL = "mongodb://localhost:27017/AthenaMongoTest";
 
@@ -33,7 +34,7 @@ describe("Test MongoDB repo builder", () => {
         const repo = container.get(UserRepo);
 
         const username = "Novo";
-        await repo.create({ username, email: 'email' });
+        await repo.create({ username, email: 'email', locations: ['Lagos'] });
         let user = await repo.findOne({ username });
         expect(user?.username).toEqual(username);
 
@@ -58,30 +59,14 @@ describe("Test MongoDB repo builder", () => {
         expect(test?.indicator).toEqual('default');
     });
 
-    // test("it should enforce enums", async () => {
-    //     const schemaString = `
-    //         """
-    //         @model
-    //         """
-    //         type TestEnum {
-    //             username: String!
-    //             role: Role!
-    //         }
+    test("it should handle enums", async () => {
+        const repo = container.get(UserRepo);
 
-    //         enum Role {
-    //             USER
-    //             ADMIN
-    //         }
-    //     `;
-
-    //     const schema = buildSchema(schemaString);
-    //     const models = extractModelsFrom(schema);
-    //     const repo = buildMongoRepo(models.TestEnum);
-
-    //     const username = "Novo";
-    //     await repo.create({ username, role: 'USER' });
-    //     await expect(repo.create({ username, role: 'INVALID' })).rejects.toThrow();
-    // });
+        const username = "Novo";
+        await repo.create({ username, email: 'email', color: Color.red });
+        await expect(repo.updateOne({ username }, { color: 'blue' }))
+            .rejects;
+    });
 
     test("it should handle mongoose errors", async () => {
         const repo = container.get(TestErrorRepo);
@@ -104,6 +89,10 @@ describe("Test MongoDB repo builder", () => {
     });
 });
 
+enum Color {
+    red = 'red', green = 'green'
+}
+
 @model('User')
 class User {
     @required()
@@ -113,6 +102,14 @@ class User {
     @required()
     @field('email', 'String')
     email!: string
+
+    @defaultValue([])
+    @field('locations', '[String]')
+    locations?: string[]
+
+    @enums(Color)
+    @field('color', 'String')
+    color?: Color
 }
 
 @model('TestMetadata')
