@@ -57,11 +57,11 @@ describe("CRUD test", () => {
         result = await userService.findOne({ username }, admin);
         expect(result.username).toBe(username);
 
-        expect(userService.findOne({ username: oldUsername }, admin))
+        await expect(userService.findOne({ username: oldUsername }, admin))
             .rejects.toHaveProperty('message', 'Not Found');
 
         await userService.removeOne({ username }, admin);
-        expect(userService.findOne({ username }, admin))
+        await expect(userService.findOne({ username }, admin))
             .rejects.toHaveProperty('message', 'Not Found');
     });
 

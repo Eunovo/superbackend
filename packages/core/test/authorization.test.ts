@@ -26,7 +26,7 @@ describe("Test Authorization", () => {
 
         await expect(storeService
             .create({ owner: impostor }, context))
-            .rejects;
+            .rejects.toThrowError('Unauthorised');
         await storeService
             .create({ owner: username }, context);
 
