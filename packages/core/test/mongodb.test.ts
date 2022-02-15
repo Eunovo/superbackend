@@ -1,7 +1,7 @@
 import "jest";
 import { connect, connection } from "mongoose";
 import {
-    defaultValue, enums, field, inject, Model, model,
+    defaultValue, enums, Field, field, inject, Model, model,
     MongoRepository, repo, required, unique
 } from "../src";
 import container from "../src/inversify.config";
@@ -66,6 +66,23 @@ describe("Test MongoDB repo builder", () => {
         await repo.create({ username, email: 'email', color: Color.red });
         await expect(repo.updateOne({ username }, { color: 'blue' }))
             .rejects;
+    });
+
+    test("it should handle sub schema", async () => {
+        const model = new Model('Test', {
+            user: new Field('user', 'user', 'User')
+        });
+        const repo = new MongoRepository<{ user: User }>(model);
+
+        try {
+            await repo.create({ user: { username: 'Novo', email: 'email' } });
+        } catch (error) {
+            console.log(error);
+            fail('Failed to create document');
+        }
+        
+        await expect(repo.create(<any>{ user: {} }))
+            .rejects.toThrowError('Validation Errors');
     });
 
     test("it should handle mongoose errors", async () => {

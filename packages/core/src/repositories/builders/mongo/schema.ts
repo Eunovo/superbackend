@@ -1,5 +1,6 @@
 import { Schema } from "mongoose";
 import { Model, Field } from "../../../model/Model";
+import { MODELS } from "../../../model";
 
 /**
  * Build the mongoose schema for
@@ -17,7 +18,7 @@ export function buildSchema(model: Model): Schema {
 /**
  * Return the `SchemaDefinition` for @param field
  */
-function getDefinition(field: Field) {
+function getDefinition(field: Field) {    
     const definition: any = {
         type: field.type
     };
@@ -36,11 +37,13 @@ function getDefinition(field: Field) {
     if (enums) definition.enums = parseToSchemaEnums(enums);
 
     const arrayType = getArrayType(definition.type);
-    if (arrayType !== null) {
-        return [{ ...definition, type: arrayType }]
-    }
+    definition.type = arrayType || definition.type;
 
-    return definition;
+    const model = (<Model[]>Object.values(MODELS))
+        .find((value) => (value.name === definition.type));
+    definition.type = model ? buildSchema(model) : definition.type;
+
+    return arrayType ? [definition] : definition;
 }
 
 function getArrayType(type: string) {
