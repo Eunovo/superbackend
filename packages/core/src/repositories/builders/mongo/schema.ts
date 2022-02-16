@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 import { Model, Field } from "../../../model/Model";
-import { MODELS } from "../../../model";
+import {  parseToSchemaEnums } from "../../../model";
 
 /**
  * Build the mongoose schema for
@@ -36,25 +36,8 @@ function getDefinition(field: Field) {
     const enums = field.getMetadataBy('enum');
     if (enums) definition.enums = parseToSchemaEnums(enums);
 
-    const arrayType = getArrayType(definition.type);
-    definition.type = arrayType || definition.type;
+    definition.type = field.model
+        ? buildSchema(field.model) : definition.type;
 
-    const model = (<Model[]>Object.values(MODELS))
-        .find((value) => (value.name === definition.type));
-    definition.type = model ? buildSchema(model) : definition.type;
-
-    return arrayType ? [definition] : definition;
-}
-
-function getArrayType(type: string) {
-    const isArrayType = type.startsWith('[') && type.endsWith(']');
-    if (!isArrayType) return null;
-    return type.substring(1, type.length - 1);
-}
-
-function parseToSchemaEnums(type: any) {
-    if (type instanceof String)
-        return type.split('|').map((v) => v.trim());
-
-    return Object.values(type).filter(v => v instanceof String);
+    return field.isArray ? [definition] : definition;
 }

@@ -1,9 +1,8 @@
 import container from "../inversify.config";
 import { Model, Field } from "./Model";
 import { createMetadataDecorator } from "./utils";
+import { MODELS, FIELDS } from "./MODELS";
 
-export const MODELS: any = {};
-export const FIELDS: any = {};
 let fieldKey = Symbol("key");
 
 export function model(name: string) {
