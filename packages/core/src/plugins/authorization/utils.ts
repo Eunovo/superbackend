@@ -22,15 +22,31 @@ export const getAccessGroupsFrom = (model: Model, obj: any, principal?: any) => 
         const metadata = field
             .getMetadataBy('user-group');
         if (!metadata) return acc;
-        
-        const { group, matcher } = metadata
+
+        const { group, principalKey, inputPredicate, filter } = metadata
         const key = field.propertyKey;
+        let input = inputPredicate
+            ? inputPredicate(obj, principal[principalKey])
+            : obj[key] === principal[principalKey];
+
+        if (field.isArray) {
+            input = obj[key].reduce((acc: boolean, val: any) => {
+                return acc && (
+                    inputPredicate
+                        ? inputPredicate(val, principal[principalKey])
+                        : val === principal[principalKey]
+                );
+            }, true);
+        }
+
         return [
             ...acc,
             {
                 group,
-                input: obj[key] === principal[matcher],
-                filter: { [key]: principal[matcher] }
+                input,
+                filter: filter
+                    ? filter(principal[principalKey])
+                    : { [key]: principal[principalKey] }
             }
         ];
     }, groups);

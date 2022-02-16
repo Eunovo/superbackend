@@ -3,6 +3,7 @@ import { CRUDService } from "../../crud";
 import { UnauthorisedError } from "../../errors";
 import container from "../../inversify.config";
 import { getAccessGroupsFrom, makeSafeFilter } from "./utils";
+import { Filter } from "../../crud/Filter";
 
 export function accessControl(tag: string) {
     return function (constructor: any) {
@@ -11,8 +12,12 @@ export function accessControl(tag: string) {
     }
 }
 
-export function userGroup(group: string, matcher: string) {
-    return createMetadataDecorator('user-group', { group, matcher });
+export function userGroup(
+    group: string, principalKey: string,
+    inputPredicate?: (value: any, principal: any) => boolean,
+    filter?: (principal: any) => Filter<any>
+) {
+    return createMetadataDecorator('user-group', { group, principalKey, inputPredicate, filter });
 }
 
 type Permissions = {
