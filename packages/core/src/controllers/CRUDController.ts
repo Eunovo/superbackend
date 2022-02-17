@@ -1,4 +1,5 @@
 import { CRUDService, CRUD } from "../crud";
+import { Filter } from "../crud/Filter";
 import { BaseController } from "./BaseController";
 import { IRequest } from "./IRequest";
 
@@ -14,7 +15,7 @@ const DEFAULT_METHODS: Methods = {
 export class CRUDController<T = any> extends BaseController {
     constructor(
         public readonly route: string,
-        protected service: CRUDService,
+        protected service: CRUDService<T>,
         protected methods: Methods = DEFAULT_METHODS
     ) {
         super(route);
@@ -28,7 +29,7 @@ export class CRUDController<T = any> extends BaseController {
 
     async create(req: IRequest<T, Partial<T>, {}>) {
         const _id = await this.service.create(
-            req.body,
+            req.body ?? (<any>{}),
             {
                 principal: req.user,
                 auth: true
@@ -46,7 +47,7 @@ export class CRUDController<T = any> extends BaseController {
 
         const data = {
             results: await this.service.findMany(
-                filter,
+                filter as Filter<T>,
                 { limit: _limit, skip: _skip },
                 {
                     principal: req.user,
@@ -63,7 +64,7 @@ export class CRUDController<T = any> extends BaseController {
     async updateMany(req: IRequest<T, Partial<T>, {}>) {
         const filter = req.query || {};
         await this.service.updateMany(
-            req.body, filter,
+            req.body ?? (<any>{}), filter,
             {
                 principal: req.user,
                 auth: true
