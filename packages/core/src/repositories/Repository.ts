@@ -1,14 +1,14 @@
-export interface Repository {
+export interface Repository<T = any> {
  
-    create(data: any): Promise<string>;
+    create(data: T): Promise<string>;
 
-    findOne(filter: any): Promise<any | null>;
+    findOne(filter: any): Promise<T | null>;
 
-    findMany(filter: any, options?: FilterOptions): Promise<any[]>;
+    findMany(filter: any, options?: FilterOptions): Promise<T[]>;
 
-    updateOne(filter: any, data: any): Promise<void>;
+    updateOne(filter: any, data: Partial<T>): Promise<void>;
 
-    updateMany(filter: any, data: any): Promise<void>;
+    updateMany(filter: any, data: Partial<T>): Promise<void>;
 
     removeOne(filter: any): Promise<void>;
 

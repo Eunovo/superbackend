@@ -8,7 +8,7 @@ export class CRUDService<T = any> extends Service {
 
     constructor(
         observable: Observable,
-        protected repo: Repository
+        protected repo: Repository<T>
     ) { super(observable) }
 
     @middleware()
@@ -34,13 +34,13 @@ export class CRUDService<T = any> extends Service {
     }
 
     @middleware()
-    async updateOne(input: T, filter: Filter<T>, context: any = {}) {        
+    async updateOne(input: Partial<T>, filter: Filter<T>, context: any = {}) {        
         await this.repo.updateOne(filter, input);
         this.fire('update', { input, filter, context });
     }
 
     @middleware()
-    async updateMany(input: T, filter: Filter<T>, context: any = {}) {        
+    async updateMany(input: Partial<T>, filter: Filter<T>, context: any = {}) {        
         await this.repo.updateMany(filter, input);
         this.fire('update', { input, filter, context });
     }

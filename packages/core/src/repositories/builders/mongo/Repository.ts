@@ -9,7 +9,7 @@ import { Repository, FilterOptions } from "../../Repository";
 import { Model } from "../../../model";
 import { buildMongoSchema } from "./builder";
 
-export class MongoRepository<T> implements Repository {
+export class MongoRepository<T> implements Repository<T> {
     protected mongooseModel: MongooseModel<Document<T>>;
 
     constructor(model: Model) {
@@ -30,7 +30,7 @@ export class MongoRepository<T> implements Repository {
         const result = await this.mongooseModel.findOne(filter)
             .lean()
             .exec();
-        return result as LeanDocument<T> | null;
+        return result as T | null;
     }
 
     async findMany(filter: FilterQuery<Document<T>>, options?: FilterOptions) {
@@ -42,7 +42,7 @@ export class MongoRepository<T> implements Repository {
         });
 
         const results = await query.lean().exec();
-        return results as LeanDocument<T>[];
+        return results as unknown as T[];
     }
 
     async updateOne(filter: FilterQuery<Document<T>>, update: any) {
