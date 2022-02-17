@@ -18,7 +18,7 @@ export class AuthService<T = any> extends CRUDService<T> {
 
     constructor(
         observable: Observable,
-        repo: Repository,
+        repo: Repository<T>,
     ) {
         super(observable, repo);
         
@@ -46,9 +46,9 @@ export class AuthService<T = any> extends CRUDService<T> {
         const user = await this.repo
             .findOne({ [usernameField]: username });
 
-        if (!user || !password || !user[passwordField]) throw new UnauthorisedError();
+        if (!user || !password || !(user as any)[passwordField]) throw new UnauthorisedError();
 
-        const isMatch = await compare(password, user[passwordField]);
+        const isMatch = await compare(password, (user as any)[passwordField]);
         if (!isMatch)
             throw new UnauthorisedError();
 
