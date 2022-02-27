@@ -66,16 +66,16 @@ export function service() {
     }
 }
 
-export function middleware() {
+export function middleware(name?: string) {
     return function (_target: any, _propertyKey: string, descriptor: PropertyDescriptor) {
         const method = descriptor.value!;
 
         descriptor.value = async function (...args: any[]) {
-            let newArgs = await (<Service>this).runPreMiddleware(method.name, ...args);
+            let newArgs = await (<Service>this).runPreMiddleware(name ?? method.name, ...args);
             const result = await method.apply(this, newArgs);
             if (!result) return result;
 
-            return (<Service>this).runPostMiddleware(method.name, result);
+            return (<Service>this).runPostMiddleware(name ?? method.name, result);
         }
     }
 }
