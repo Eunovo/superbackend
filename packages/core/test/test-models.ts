@@ -1,6 +1,6 @@
 import {
     model, field, username, password,
-    MongoRepository, repo, AuthService,
+    MongoRepository, repo, UsernamePasswordAuthService,
     controller, service, inject,
     accessControl, authorize,
     userGroup, CRUDController,
@@ -37,14 +37,14 @@ export class TestService extends CRUDService {
 
 @authorize(User)
 @service()
-export class UserService extends AuthService {
-    @getModel(User) protected model!: Model;
+export class UserService extends UsernamePasswordAuthService {
 
     constructor(
         @inject(Observable) observable: Observable,
-        @inject(UserRepo) repo: UserRepo
+        @inject(UserRepo) repo: UserRepo,
+        @inject(User) model: Model
     ) {
-        super(observable, repo);
+        super(observable, repo, model);
     }
 }
 

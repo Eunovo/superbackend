@@ -1,6 +1,6 @@
 import "jest";
 import {
-    AuthService, getModel, Model,
+    UsernamePasswordAuthService, Model, Repository, inject, MODELS,
 } from "../src";
 import { Observable } from "../src/Observable";
 import { model, field, username, password } from "../src";
@@ -14,6 +14,17 @@ export class User {
     @password()
     @field('password', 'String')
     password?: string;
+}
+
+
+class UserService extends UsernamePasswordAuthService {
+    constructor(
+        observable: Observable,
+        repo: Repository,
+        model: Model
+    ) {
+        super(observable, repo, model);
+    }
 }
 
 describe("test authentication plugin", () => {
@@ -36,7 +47,7 @@ describe("test authentication plugin", () => {
             }
         };
 
-        let service = new UserService(new Observable(), repo);
+        let service = new UserService(new Observable(), repo, MODELS[User as any]);
 
         await service.create({ username, password });
         await service.authenticate(username, password);
@@ -51,8 +62,3 @@ describe("test authentication plugin", () => {
         expect.assertions(4);
     });
 });
-
-
-class UserService extends AuthService {
-    @getModel(User) protected model?: Model;
-}
