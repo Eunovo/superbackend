@@ -42,9 +42,11 @@ export function authorize(modelConstructor: any) {
         service.pre(
             'create',
             (_: string, input: any, context: any, ...args: any[]) => {
+                if (!context) return [input, context, ...args];
+
                 const modelPermissions = ACCESSPERMISSIONS[model.getMetadataBy('access-tag')];
                 const permissions = modelPermissions.create;
-                const groups = getAccessGroupsFrom(model, input, context?.principal);
+                const groups = getAccessGroupsFrom(model, input, context.principal);
                 let canCreate = false;
                 groups.forEach(({ group, input }) => {
                     canCreate = canCreate || (permissions[group] && input);
@@ -64,6 +66,8 @@ export function authorize(modelConstructor: any) {
                 if (method === 'findMany') {
                     context = args[1];
                 }
+
+                if (!context) return [filter, context, ...args];
 
                 const modelPermissions = ACCESSPERMISSIONS[model.getMetadataBy('access-tag')];
                 const permissions = modelPermissions[
@@ -92,6 +96,8 @@ export function authorize(modelConstructor: any) {
         service.pre(
             ['updateOne', 'updateMany'],
             (_: string, input: any, filter: any, context: any, ...args: any[]) => {
+                if (!context) return [input, filter, context, ...args];
+
                 const modelPermissions = ACCESSPERMISSIONS[model.getMetadataBy('access-tag')];
                 const permissions = modelPermissions.read;
                 const groups = getAccessGroupsFrom(model, filter, context?.principal);
