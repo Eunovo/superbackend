@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 import { Model, Field } from "../../../model/Model";
-import {  parseToSchemaEnums } from "../../../model";
+import { parseToSchemaEnums } from "../../../model";
 
 /**
  * Build the mongoose schema for
@@ -11,14 +11,14 @@ export function buildSchema(model: Model): Schema {
         model.fields.reduce((prev, field: Field) => {
             if (field.name === '_id') return prev;
             return { ...prev, [field.name]: getDefinition(field) };
-        }, {})    
+        }, {})
     );
 }
 
 /**
  * Return the `SchemaDefinition` for @param field
  */
-function getDefinition(field: Field) {    
+function getDefinition(field: Field) {
     const definition: any = {
         type: field.type
     };
@@ -28,10 +28,11 @@ function getDefinition(field: Field) {
         'unique',
         'default',
         'immutable'
-    ].forEach((name) => {
-        const value = field.getMetadataBy(name);
-        definition[name] = value;
-    });
+    ].filter((name) => field.getMetadataBy(name))
+        .forEach((name) => {
+            const value = field.getMetadataBy(name);
+            definition[name] = value;
+        });
 
     const enums = field.getMetadataBy('enum');
     if (enums) definition.enums = parseToSchemaEnums(enums);
