@@ -1,6 +1,7 @@
 import { HttpMethods } from "./BaseController";
 import container from "../inversify.config";
 import { getParameters } from "../decorators";
+import { UnauthorisedError } from "../errors";
 
 let HANDLERS: any[] = [];
 
@@ -48,4 +49,15 @@ export function patch(route: string) {
 
 export function route(method: HttpMethods, route: string) {
     return createDecoratorFor(method, route);
+}
+
+export function requireAuth() {
+    return function (target: any, propertyKey: string) {
+        target[propertyKey] = (req: any) => {
+            if (!req.user) {
+                throw new UnauthorisedError();
+            }
+            return target[propertyKey](req);
+        }
+    }
 }
