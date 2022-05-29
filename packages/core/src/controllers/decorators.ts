@@ -27,7 +27,7 @@ export function controller() {
 
 function createDecoratorFor(method: HttpMethods, route: string) {
     return function (target: any, propertyKey: string) {
-        HANDLERS.push({ method, route, handler: target[propertyKey] });
+        HANDLERS.push({ method, route, key: propertyKey, handler: target[propertyKey] });
     };
 }
 
@@ -52,12 +52,19 @@ export function route(method: HttpMethods, route: string) {
 }
 
 export function requireAuth() {
-    return function (target: any, propertyKey: string) {
-        target[propertyKey] = (req: any) => {
-            if (!req.user) {
-                throw new UnauthorisedError();
+    return function (_target: any, propertyKey: string) {
+        const index = HANDLERS.findIndex((value) => value.key === propertyKey);
+        if (index === -1) throw new Error("Not a controller function");
+
+        const handler = HANDLERS[index];
+        HANDLERS[index] = {
+            ...handler,
+            handler: function (req: any) {
+                if (!req.user) {
+                    throw new UnauthorisedError();
+                }
+                return handler.handler.bind(this)(req);
             }
-            return target[propertyKey](req);
         }
     }
 }

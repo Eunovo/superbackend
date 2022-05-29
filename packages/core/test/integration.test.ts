@@ -1,7 +1,7 @@
 import "jest";
 import { connect, connection } from "mongoose";
 import container from "../src/inversify.config";
-import { setPermissions } from "../src";
+import { setPermissions, UnauthorisedError } from "../src";
 import { UserController, UserService } from "./test-models";
 
 const DB_URL = "mongodb://localhost:27017/AthenaServicesTest";
@@ -73,11 +73,11 @@ describe("CRUD test", () => {
 
         const findMany = async (args: any) => {
             let result = await userService.findMany(args.filter, {}, {
-                    principal: {
-                        username: args.username,
-                        role: args.role
-                    }
-                });
+                principal: {
+                    username: args.username,
+                    role: args.role
+                }
+            });
             expect(result.length).toEqual(args.length);
         }
 
@@ -101,7 +101,7 @@ describe("CRUD test", () => {
         expect(userController.route).toEqual(USER_ROUTE);
         const postHandler = userController.getHandler(`${USER_ROUTE}/`, 'post');
         const getHandler = userController.getHandler(`${USER_ROUTE}/get`, 'get');
-        
+
         if (!postHandler || !getHandler) fail('Handler is not defined');
 
         const username = 'ctrller_test';
@@ -118,5 +118,18 @@ describe("CRUD test", () => {
     });
 
     test.todo("it should delete data matching the params in the db");
+
+    test(
+        "it should throw Unauthorised Error if request is not authenticated",
+        () => {
+            const user = { username: 'bob' };
+            const handler = userController.getHandler('/users/require-auth', 'get');
+        
+            if (!handler) fail('Handler is not defined');
+
+            handler({ user, query: {} });
+            expect(() => handler({ query: {} })).toThrowError(UnauthorisedError);
+        }
+    );
 
 });

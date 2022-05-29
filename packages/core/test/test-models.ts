@@ -4,7 +4,7 @@ import {
     controller, service, inject,
     accessControl, authorize,
     userGroup, CRUDController,
-    getModel, Model, get, CRUDService
+    Model, get, CRUDService, requireAuth
 } from "../src";
 import { Observable } from "../src/Observable";
 
@@ -58,6 +58,12 @@ export class UserController extends CRUDController {
 
     @get('/get')
     test(req: any) {
+        return super.getMany(req);
+    }
+
+    @requireAuth()
+    @get('/require-auth')
+    testRequireAuth(req: any) {
         return super.getMany(req);
     }
 
