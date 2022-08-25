@@ -38,7 +38,7 @@ export class MongoRepository<T> implements Repository<T> {
 
         ['limit', 'skip'].forEach((key) => {
             const option = options?.[<keyof FilterOptions>key];
-            if (option) (<any>query)[<any>key](option);
+            if (option !== undefined && option !== null) (<any>query)[<any>key](option);
         });
 
         const results = await query.lean().exec();
