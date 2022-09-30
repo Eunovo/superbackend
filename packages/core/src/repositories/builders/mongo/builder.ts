@@ -1,8 +1,9 @@
+import { Schema } from "mongoose";
 import { Model } from "../../../model/Model";
 import { handleMongooseError } from "./error-handler";
 import { buildSchema } from "./schema";
 
-export const buildMongoSchema = (model: Model) => {
+export const buildMongoSchema = <T> (model: Model): Schema<T> => {
     const mongooseSchema = buildSchema(model);
 
     mongooseSchema.post('save', handleMongooseError);

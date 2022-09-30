@@ -45,6 +45,8 @@ export function authorize(modelConstructor: any) {
                 if (!context) return [input, context, ...args];
 
                 const modelPermissions = ACCESSPERMISSIONS[model.getMetadataBy('access-tag')];
+                if (!modelPermissions)
+                    throw new Error(`No permissions set for "${model.getMetadataBy('access-tag')}"`);
                 const permissions = modelPermissions.create;
                 const groups = getAccessGroupsFrom(model, input, context.principal);
                 let canCreate = false;
@@ -70,6 +72,8 @@ export function authorize(modelConstructor: any) {
                 if (!context) return [filter, context, ...args];
 
                 const modelPermissions = ACCESSPERMISSIONS[model.getMetadataBy('access-tag')];
+                if (!modelPermissions)
+                    throw new Error(`No permissions set for "${model.getMetadataBy('access-tag')}"`);
                 const permissions = modelPermissions[
                     method.startsWith('find') ? 'read': 'delete'
                 ];

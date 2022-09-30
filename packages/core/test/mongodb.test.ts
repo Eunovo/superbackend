@@ -11,14 +11,12 @@ const DB_URL = "mongodb://localhost:27017/AthenaMongoTest";
 
 describe("Test MongoDB repo builder", () => {
 
-    beforeAll(() => {
-        connect(DB_URL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        }, (err) => {
+    beforeAll((done) => {
+        connect(DB_URL, (err) => {
             if (err) {
                 console.error(err);
             }
+            done();
         });
     });
 

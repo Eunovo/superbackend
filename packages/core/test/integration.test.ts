@@ -8,26 +8,24 @@ const DB_URL = "mongodb://localhost:27017/AthenaServicesTest";
 const userService = container.get(UserService);
 const userController = container.get(UserController);
 
+setPermissions({
+    user: {
+        create: { public: true },
+        read: { owner: true, admin: true },
+        update: { owner: true, admin: true },
+        delete: { admin: true }
+    }
+});
+
 describe("CRUD test", () => {
 
-    beforeAll(async () => {
-        await connect(DB_URL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        }, (err) => {
+    beforeAll((done) => {
+        connect(DB_URL, (err) => {
             if (err) {
                 console.error(err);
             }
+            done();
         });
-
-        setPermissions({
-            user: {
-                create: { public: true },
-                read: { owner: true, admin: true },
-                update: { owner: true, admin: true },
-                delete: { admin: true }
-            }
-        })
     });
 
     afterEach(async () => {

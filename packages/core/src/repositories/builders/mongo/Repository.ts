@@ -3,19 +3,20 @@ import {
     Model as MongooseModel,
     model as createMongooseModel,
     FilterQuery,
-    LeanDocument
+    LeanDocument,
+    AnyKeys
 } from "mongoose";
 import { Repository, FilterOptions } from "../../Repository";
 import { Model } from "../../../model";
 import { buildMongoSchema } from "./builder";
 
 export class MongoRepository<T> implements Repository<T> {
-    protected mongooseModel: MongooseModel<Document<T>>;
+    protected mongooseModel: MongooseModel<T>;
 
     constructor(model: Model) {
         const name = model.name;
-        const schema = buildMongoSchema(model);
-        this.mongooseModel = createMongooseModel(name, schema);
+        const schema = buildMongoSchema<T>(model);
+        this.mongooseModel = createMongooseModel<T>(name, schema);
     }
 
     async create(data: T) {
