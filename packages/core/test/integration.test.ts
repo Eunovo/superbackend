@@ -99,8 +99,9 @@ describe("CRUD test", () => {
         expect(userController.route).toEqual(USER_ROUTE);
         const postHandler = userController.getHandler(`${USER_ROUTE}/`, 'post');
         const getHandler = userController.getHandler(`${USER_ROUTE}/get`, 'get');
+        const altHandelr = userController.getHandler(`${USER_ROUTE}/alternative`, 'get');
 
-        if (!postHandler || !getHandler) fail('Handler is not defined');
+        if (!postHandler || !getHandler || !altHandelr) fail('Handler is not defined');
 
         const username = 'ctrller_test';
         await postHandler({

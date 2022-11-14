@@ -67,4 +67,9 @@ export class UserController extends CRUDController {
         return super.getMany(req);
     }
 
+    @get('/alternative')
+    testAlt = (req: any) => {
+        return super.getMany(req);
+    }
+
 }

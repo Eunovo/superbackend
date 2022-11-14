@@ -3,15 +3,43 @@ import container from "../inversify.config";
 import { getParameters } from "../decorators";
 import { UnauthorisedError } from "../errors";
 
-let HANDLERS: any[] = [];
+class Handler {
+
+    private middleware: Function[] = [];
+
+    constructor(
+        public readonly method: HttpMethods,
+        public readonly route: string,
+        public readonly key: string
+    ) {}
+
+    pre(func: Function) {
+        this.middleware.push(func);
+    }
+
+    getRequestFunc(rawFunc: any) {
+        return (req: any) => {
+            for (const func of this.middleware) {
+                func(req);
+            }
+            return rawFunc(req);
+        }
+    }
+}
+
+let HANDLERS: Handler[] = [];
 
 export function controller() {
     return function <T extends { new(...args: any[]): {} }>(constructor: T) {
         const ControllerClass = class extends constructor {
             constructor (...args: any[]) {
                 super(...args);
-                HANDLERS.forEach(({ method, route, handler }) => {
-                    (this as any)[method](route, handler.bind(this));
+                HANDLERS.forEach((handler) => {
+                    const rawFunc = (this as any)[handler.key].bind(this);
+                    (this as any)[handler.method](
+                        handler.route,
+                        handler.getRequestFunc(rawFunc)
+                    );
                 });
                 HANDLERS = [];
             }
@@ -26,8 +54,8 @@ export function controller() {
 }
 
 function createDecoratorFor(method: HttpMethods, route: string) {
-    return function (target: any, propertyKey: string) {
-        HANDLERS.push({ method, route, key: propertyKey, handler: target[propertyKey] });
+    return function (_target: any, propertyKey: string) {
+        HANDLERS.push(new Handler(method, route, propertyKey));
     };
 }
 
@@ -57,14 +85,10 @@ export function requireAuth() {
         if (index === -1) throw new Error("Not a controller function");
 
         const handler = HANDLERS[index];
-        HANDLERS[index] = {
-            ...handler,
-            handler: function (req: any) {
-                if (!req.user) {
-                    throw new UnauthorisedError();
-                }
-                return handler.handler.bind(this)(req);
+        handler.pre((req: any) => {
+            if (!req.user) {
+                throw new UnauthorisedError();
             }
-        }
+        });
     }
 }
